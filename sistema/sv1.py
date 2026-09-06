@@ -44,8 +44,14 @@ def _ahora():
 
 
 class Servicio:
-    def __init__(self, con, guion, corrida_id, url_sv2):
+    def __init__(self, con, guion, corrida_id, url_sv2, reconstruye_orden=True):
         self.con = con
+        # El mutante de C1-A. Apagarlo hace que SV-1 trate la posicion de LLEGADA
+        # como si fuera el instante en que ocurrio -- que es lo que hace un
+        # sistema que no reconstruye el orden--. No es una opcion de operacion:
+        # existe para que la medicion pueda VERSE fallar. Si con esto apagado
+        # C1-A siguiera saliendo verde, C1-A no estaria midiendo nada.
+        self.reconstruye_orden = reconstruye_orden
         self.guion = guion
         self.corrida_id = corrida_id
         self.url_sv2 = url_sv2
@@ -131,21 +137,56 @@ class Servicio:
                          "regla_id": "RC-01"}
 
         # --- paso 2 · evaluar sobre el prefijo persistido, y decidir.
-        propuestas = self._evaluar(envio_id, cuerpo["produccion_min"])
+        # El instante de decision NO es el de la lectura que acaba de llegar: es
+        # la marca de agua del envio, el mayor instante de produccion que consta.
+        # Usar el de la recien llegada haria que una lectura tardia y antigua
+        # hiciera RETROCEDER la conclusion -- el sistema olvidaria lo que ya
+        # sabia-- y eso es depender del orden de entrega, que es justo lo que
+        # D2 dice que no pasa. Lo encontro C1-A.
+        propuestas = self._evaluar(envio_id, self._marca_de_agua(envio_id))
         return 200, {"desenlace": "evaluada", "envio_id": envio_id,
                      "secuencia": secuencia, "acciones_en_bandeja": propuestas}
 
+    def _marca_de_agua(self, envio_id):
+        """El mayor instante de produccion que consta para este envio.
+
+        Se deriva del prefijo PERSISTIDO, no de la ultima peticion, asi que es
+        monotona por construccion y no depende del orden en que lleguen las
+        lecturas. Es lo unico que puede hacer que la conclusion sea la misma
+        vengan como vengan.
+        """
+        if not self.reconstruye_orden:
+            # Sin reconstruccion, «ahora» es la ultima que llego, venga de cuando
+            # venga: el instante de decision pasa a depender del transporte.
+            fila = self.con.execute(
+                "SELECT count(*) AS n FROM lectura WHERE corrida_id = ? AND envio_id = ?",
+                (self.corrida_id, envio_id)).fetchone()
+            return fila["n"] - 1
+        fila = self.con.execute(
+            "SELECT max(produccion_min) AS tope FROM lectura "
+            "WHERE corrida_id = ? AND envio_id = ?",
+            (self.corrida_id, envio_id)).fetchone()
+        return fila["tope"]
+
     def _envio_del_prefijo(self, envio_id):
         """El envio tal como SV-1 lo conoce: lo que tiene PERSISTIDO."""
+        orden = ("produccion_min, secuencia" if self.reconstruye_orden else "rowid")
         filas = self.con.execute(
             "SELECT secuencia, produccion_min, valor_c FROM lectura "
-            "WHERE corrida_id = ? AND envio_id = ? ORDER BY produccion_min, secuencia",
+            "WHERE corrida_id = ? AND envio_id = ? ORDER BY " + orden,
             (self.corrida_id, envio_id)).fetchall()
-        lecturas = tuple(
-            dominio.Lectura(indice=f["secuencia"],
-                            produccion=reloj.instante(f["produccion_min"]),
-                            valor=f["valor_c"], envio_id=envio_id)
-            for f in filas)
+        if self.reconstruye_orden:
+            lecturas = tuple(
+                dominio.Lectura(indice=f["secuencia"],
+                                produccion=reloj.instante(f["produccion_min"]),
+                                valor=f["valor_c"], envio_id=envio_id)
+                for f in filas)
+        else:
+            lecturas = tuple(
+                dominio.Lectura(indice=posicion,
+                                produccion=reloj.instante(posicion),
+                                valor=f["valor_c"], envio_id=envio_id)
+                for posicion, f in enumerate(filas))
         lotes = tuple(
             dominio.Lote(lote_id=l["lote_id"], tipo_producto=l["tipo_id"],
                          carga=reloj.instante(l["carga_min"]),
@@ -305,6 +346,21 @@ class Servicio:
                      "entregadas": entregadas, "rechazadas": rechazadas,
                      "fallidas": fallidas}
 
+    def conclusiones(self):
+        """Lo que SV-1 concluyo, por lote. Es lo que C1-A compara.
+
+        Se publica el mismo juego de campos que la referencia calcula sobre el
+        guion, para que la comparacion sea campo a campo y no «parece que si».
+        """
+        filas = self.con.execute(
+            "SELECT lote_id, aptitud, regla_aptitud, acumulado_min, clase_accion, "
+            "regla_clase_accion, marca_secuencia, provisional, umbral_superado, "
+            "irreversible_activa FROM conclusion_lote WHERE corrida_id = ? "
+            "ORDER BY lote_id", (self.corrida_id,)).fetchall()
+        return 200, {"corrida_id": self.corrida_id,
+                     "lotes": {f["lote_id"]: dict(f) for f in filas},
+                     "total": len(filas)}
+
     def bandeja(self):
         filas = self.con.execute(
             "SELECT lote_id, secuencia_apertura, clase, estado, intentos "
@@ -325,6 +381,8 @@ class Servicio:
                          "digesto_guion": modulo_guion.digesto(self.guion)}
         if metodo == "GET" and camino == "/bandeja":
             return self.bandeja()
+        if metodo == "GET" and camino == "/conclusiones":
+            return self.conclusiones()
         if metodo == "POST" and camino == "/lecturas":
             return self.recibir_lectura(cuerpo)
         if metodo == "POST" and camino == "/drenar":
@@ -340,9 +398,13 @@ def main(argv=None):
     partes.add_argument("--digesto", required=True)
     partes.add_argument("--corrida", required=True)
     partes.add_argument("--sv2", required=True, help="URL base de SV-2")
+    partes.add_argument("--repeticiones", type=int, default=1)
+    partes.add_argument("--sin-reconstruccion-de-orden", action="store_true",
+                        help="MUTANTE: trata el orden de llegada como el real. "
+                             "Existe para que C1-A pueda verse fallar.")
     args = partes.parse_args(argv)
 
-    g = modulo_guion.generar(args.semilla)
+    g = modulo_guion.generar(args.semilla, args.repeticiones)
     try:
         modulo_guion.exigir_digesto(g, args.digesto)
     except ValueError as error:
@@ -350,7 +412,10 @@ def main(argv=None):
         return 3
 
     con = almacen.abrir_al1(almacen.ruta_al1(args.directorio))
-    servicio = Servicio(con, g, args.corrida, args.sv2)
+    servicio = Servicio(con, g, args.corrida, args.sv2,
+                        reconstruye_orden=not args.sin_reconstruccion_de_orden)
+    if args.sin_reconstruccion_de_orden:
+        print("SV-1 ARRANCA MUTADO: sin reconstruccion de orden", flush=True)
     servidor = protocolo.crear_servidor(args.puerto, servicio.manejar)
     print("SV-1 escuchando en %s" % protocolo.base(args.puerto), flush=True)
     try:

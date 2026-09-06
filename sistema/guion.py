@@ -125,37 +125,50 @@ def _perfil_dos_lotes(az, tipo="P-FRE"):
 PERFILES = (_perfil_normal, _perfil_rescate, _perfil_disposicion, _perfil_dos_lotes)
 
 
-def generar(semilla):
-    """El guion completo para esta semilla. Determinista, sin reloj de pared."""
+def generar(semilla, repeticiones=1):
+    """El guion completo para esta semilla. Determinista, sin reloj de pared.
+
+    `repeticiones` recorre la baraja de perfiles mas de una vez, y da
+    `4 x repeticiones` envios. C1-A lo necesita: su umbral pide **>= 5 envios
+    distintos**, y con una sola vuelta hay cuatro.
+
+    **Con `repeticiones=1` la secuencia de llamadas al azar es exactamente la de
+    antes, asi que el digesto por defecto no se mueve.** Si se moviera, PL-2
+    estaria comparando su corrida contra otro guion sin que nadie lo hubiera
+    decidido.
+    """
     az = random.Random(semilla)
     etiqueta = _etiqueta(semilla)
-    perfiles = list(PERFILES)
-    az.shuffle(perfiles)
 
     envios = []
     n_lote = 0
-    for indice, construir in enumerate(perfiles, start=1):
-        crudo = construir(az)
-        envio_id = "EN-%s-%02d" % (etiqueta, indice)
-        lotes = []
-        for clase, carga, entrega in crudo["lotes"]:
-            n_lote += 1
-            lotes.append({
-                "lote_id": "LT-%s-%02d" % (etiqueta, n_lote),
-                "tipo_id": crudo["tipo"],
-                "carga_min": carga,
-                "entrega_min": entrega,
-                "carga_secuencia": carga,
-                "entrega_secuencia": entrega,
-                "ventana": clase,
+    n_envio = 0
+    for _ in range(repeticiones):
+        perfiles = list(PERFILES)
+        az.shuffle(perfiles)
+        for construir in perfiles:
+            crudo = construir(az)
+            n_envio += 1
+            envio_id = "EN-%s-%02d" % (etiqueta, n_envio)
+            lotes = []
+            for clase, carga, entrega in crudo["lotes"]:
+                n_lote += 1
+                lotes.append({
+                    "lote_id": "LT-%s-%02d" % (etiqueta, n_lote),
+                    "tipo_id": crudo["tipo"],
+                    "carga_min": carga,
+                    "entrega_min": entrega,
+                    "carga_secuencia": carga,
+                    "entrega_secuencia": entrega,
+                    "ventana": clase,
+                })
+            envios.append({
+                "envio_id": envio_id,
+                "estado": "EN_RUTA",
+                "perfil_esperado": crudo["espera"],
+                "lecturas": crudo["lecturas"],
+                "lotes": lotes,
             })
-        envios.append({
-            "envio_id": envio_id,
-            "estado": "EN_RUTA",
-            "perfil_esperado": crudo["espera"],
-            "lecturas": crudo["lecturas"],
-            "lotes": lotes,
-        })
 
     return {"version_guion": VERSION_GUION, "semilla": semilla,
             "etiqueta": etiqueta, "envios": envios}

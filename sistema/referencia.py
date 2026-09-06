@@ -45,37 +45,58 @@ def _envio_de(crudo):
     return dominio.Envio(crudo["envio_id"], lotes, lecturas)
 
 
+def conclusiones_del_envio(envio, envio_id=None):
+    """Evalua un envio entero redecidiendo en cada instante, y devuelve
+    (conclusiones por lote, acciones registradas).
+
+    Lo usa la referencia y lo usa C1-A para evaluar el mismo envio con los
+    instantes de produccion reasignados por orden de llegada. **Tiene que ser la
+    misma funcion en los dos casos**: si cada lado evaluara con su propio codigo,
+    una divergencia podria venir del instrumento y no del sistema.
+    """
+    sw = Interruptores()
+    registro = RegistroAcciones(sw)
+    instantes = [lec.produccion for lec in
+                 sorted(envio.lecturas, key=lambda l: l.produccion)]
+    ultima = {}
+    for t_d in instantes:
+        for lote in envio.lotes:
+            ultima[lote.lote_id] = motor.evaluar_lote(envio, lote, t_d, sw, registro)
+
+    conclusiones = {}
+    for lote_id, c in ultima.items():
+        # `imputadas` y `fuera_de_rango` no son adorno: son lo que hace
+        # distinguibles las clases IV-4 y IV-5, que a nivel de aptitud podrian
+        # no verse.
+        conclusiones[lote_id] = {
+            "envio_id": envio_id or envio.envio_id,
+            "tipo_id": c.tipo_producto,
+            "aptitud": c.aptitud,
+            "regla_aptitud": c.regla_aptitud,
+            "acumulado_min": c.acumulado,
+            "clase_accion": c.clase_accion,
+            "regla_clase_accion": c.regla_clase_accion,
+            "marca_secuencia": c.marca_secuencia,
+            "provisional": c.provisional,
+            "t_d_min": reloj.desplazamiento(c.t_d),
+            "umbral_superado": c.umbral_superado,
+            "irreversible_activa": c.irreversible_activa,
+            "imputadas": sum(1 for v in c.veredictos if v.imputacion == "imputada"),
+            "fuera_de_rango": sum(1 for v in c.veredictos
+                                  if v.situacion == "fuera_de_rango"),
+        }
+    return conclusiones, registro.acciones
+
+
 def calcular(guion):
     """La referencia: conclusion final por lote y ternas actuables del guion."""
-    sw = Interruptores()
     conclusiones = {}
     ternas = []
     for crudo in guion["envios"]:
         envio = _envio_de(crudo)
-        registro = RegistroAcciones(sw)
-        instantes = [lec.produccion for lec in
-                     sorted(envio.lecturas, key=lambda l: l.produccion)]
-        ultima = {}
-        for t_d in instantes:
-            for lote in envio.lotes:
-                ultima[lote.lote_id] = motor.evaluar_lote(
-                    envio, lote, t_d, sw, registro)
-        for lote_id, conclusion in ultima.items():
-            conclusiones[lote_id] = {
-                "envio_id": crudo["envio_id"],
-                "tipo_id": conclusion.tipo_producto,
-                "aptitud": conclusion.aptitud,
-                "regla_aptitud": conclusion.regla_aptitud,
-                "acumulado_min": conclusion.acumulado,
-                "clase_accion": conclusion.clase_accion,
-                "regla_clase_accion": conclusion.regla_clase_accion,
-                "marca_secuencia": conclusion.marca_secuencia,
-                "provisional": conclusion.provisional,
-                "t_d_min": reloj.desplazamiento(conclusion.t_d),
-                "umbral_superado": conclusion.umbral_superado,
-                "irreversible_activa": conclusion.irreversible_activa,
-            }
-        for accion in registro.acciones:
+        del_envio, acciones = conclusiones_del_envio(envio, crudo["envio_id"])
+        conclusiones.update(del_envio)
+        for accion in acciones:
             ternas.append({
                 "lote_id": accion.lote_id,
                 "secuencia_apertura": reloj.desplazamiento(accion.apertura_excursion),

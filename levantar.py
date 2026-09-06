@@ -40,10 +40,14 @@ class Orquesta:
     """
 
     def __init__(self, directorio, semilla=SEMILLA_POR_DEFECTO, corrida=None,
-                 silencioso=False):
+                 silencioso=False, repeticiones=1, sin_orden=False):
         self.directorio = Path(directorio)
         self.semilla = semilla
-        self.guion = modulo_guion.generar(semilla)
+        self.repeticiones = repeticiones
+        # Mutante de C1-A: SV-1 arranca sin reconstruir el orden. Solo lo usa la
+        # calibracion, para ver a la medicion ponerse roja.
+        self.sin_orden = sin_orden
+        self.guion = modulo_guion.generar(semilla, repeticiones)
         self.digesto = modulo_guion.digesto(self.guion)
         self.corrida_id = corrida or ("CO-%s-%d" % (self.guion["etiqueta"], semilla))
         self.silencioso = silencioso
@@ -87,7 +91,9 @@ class Orquesta:
         self.proceso_sv1 = self._lanzar("sistema.sv1", [
             "--puerto", str(self.puerto_sv1), "--directorio", str(self.directorio),
             "--semilla", str(self.semilla), "--digesto", self.digesto,
-            "--corrida", self.corrida_id, "--sv2", self.url_sv2])
+            "--corrida", self.corrida_id, "--sv2", self.url_sv2,
+            "--repeticiones", str(self.repeticiones)]
+            + (["--sin-reconstruccion-de-orden"] if self.sin_orden else []))
         if protocolo.esperar_vivo(self.url_sv1) is None:
             raise RuntimeError("SV-1 no respondio a /salud: %s" % self._diagnostico(
                 self.proceso_sv1))
