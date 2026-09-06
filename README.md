@@ -132,8 +132,11 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
    que el valor sea el correcto.
 5. **No afirma que las cifras de temperatura vengan de la norma.** No vienen: para
    transporte, la norma no fija ninguna `[V]`. Se toman prestadas y se declara.
-6. **No afirma haber sido leído por nadie que no sea su autor.** La tanda 0 de
-   lectura externa está **NO MEDIDA**, y por qué está en `evidencia/tanda-0.md`.
+6. **No afirma haber sido leído por nadie que no sea su autor.** Se intentó dos
+   veces y **las dos salieron NO MEDIDO**: una antes de que existiera código y
+   otra sobre este mismo texto ya completo. Están declaradas en
+   `evidencia/tanda-0.md`, y la primera **no se ha reescrito**: sigue diciendo lo
+   que dijo.
    **Esa ausencia es un dato del proyecto, no una omisión del texto.**
 7. **No afirma fechas, plazos ni compromisos de entrega.** No hay hoja de ruta con
    fechas en este repositorio, y no se va a añadir una.
@@ -355,29 +358,16 @@ python cinturon.py
 Ocho etapas **de la más barata a la más cara**. La primera no arranca un solo
 proceso y aun así puede poner rojo el push entero; la última mata ciento sesenta
 y ocho. Esta tabla **no está tecleada**: se genera desde el artefacto crudo de la
-corrida con `python tabla.py`, y si no se pudiera regenerar, la publicación no
+corrida con `python tabla.py evidencia/pl-5/verde/corrida.json`, y si no se pudiera regenerar, la publicación no
 valdría.
 
 | Etapa | Qué corre | Desenlace | Segundos |
 |---|---|---|---|
 | **EP-0** | ESTATICA · el gate de texto | **APROBADO** | 0.0 |
-| **EP-1+2** | BANCO Y MUTACION POR REGLA | **APROBADO** | 15.7 |
+| **EP-1+2** | BANCO Y MUTACION POR REGLA | **APROBADO** | 16.0 |
 | **EP-3** | PREFLIGHT DE LA MEDICION | **APROBADO** | 0.5 |
-| **EP-4..7** | C1-A · C1-B · CALIBRACION · SEC-5 | **APROBADO** | 227.7 |
-| | **TOTAL** | **APROBADO** | **244.0** |
-
-**Código de salida: 0.** Corrida del 2026-09-06T13:46:04+00:00, en `win32`, con Python 3.13.14.
-Digesto del banco: `8829ea9c6300f8cc`.
-
-Procesos arrancados directamente por el cinturón: **3**.
-Procesos que la medición mata por dentro: **168**.
-
-**Lo que esta corrida NO midió**, declarado en el propio artefacto:
-- minutos y limites del proveedor de CI
-- memoria y minutos de CPU
-- muerte de la maquina
-- carga
-- concurrencia externa
+| **EP-4..7** | C1-A · C1-B · CALIBRACION · SEC-5 | **APROBADO** | 227.1 |
+| | **TOTAL** | **APROBADO** | **243.6** |
 
 ### Tres desenlaces, no dos
 
@@ -411,7 +401,7 @@ salir distinto.
 
 ### Lo que cuesta, y lo que no se sabe
 
-La corrida completa tarda **244,0 segundos** en esta máquina. **Eso no son minutos
+La corrida completa tarda **243,6 segundos** en esta máquina. **Eso no son minutos
 de un proveedor de CI**: no hay proveedor elegido, y aquí no entra ninguna cifra
 de minutos, ningún precio ni ningún nombre de plan **sin la cita literal de su
 documentación**. En este portafolio ya murió una premisa así, y costó horas.
@@ -482,7 +472,55 @@ las que dejen mal al planteamiento. Una respuesta editada no sirve para nada.
 
 ---
 
-## 7 · Cómo leer las marcas
+## 7 · De dónde viene esto, y con qué se relaciona
+
+Este repositorio no es el primero de su autor, y **casi todo lo que aquí se hace
+bien se aprendió fallando en los anteriores**. Decir de dónde viene cada cosa es
+parte de lo que se publica: una práctica sin su origen parece una opinión.
+
+### Lo que se hereda, y de qué fallo concreto salió
+
+| Práctica | De dónde salió |
+|---|---|
+| **Una prueba negativa afirma la CLASE del fallo**, no que «algo falló» | De un proyecto anterior donde una prueba pasaba por el motivo equivocado |
+| **La mutación tiene que tirar los casos DE ESA regla**, no casos cualesquiera | Es lo que encontró **una regla implementada dos veces, con media viva** — un defecto real que ninguna otra capa vio |
+| **Un número en pantalla necesita un guardia** | De publicar una cifra que nadie podía recalcular |
+| **Publicar la tabla CON los fallos dentro** | De aprender que promediar una tabla es elegir qué filas se copian |
+| **Declarar lo que no se midió** | De confundir «no salió mal» con «se comprobó» |
+| **Un instrumento tiene que saber negarse** | De una medición que salía verde sin haber ejercido nada |
+
+Las tres últimas son las que más se usan aquí: **este proyecto publica dos
+corridas que salieron mal a propósito**, y una lista de lo que no midió pegada a
+cada resultado.
+
+### Con qué NO compite
+
+Hay otro repositorio del portafolio que **sí tiene algo que se puede pinchar**, y
+contra la indiferencia —que es el enemigo real— un enlace vivo gana a un
+repositorio que hay que clonar. Este proyecto **no lo desplaza**: cubre un eje
+distinto, el que aquel declaró explícitamente que no compraba.
+
+La regla que se aplica es sencilla: **cuando lo que hace falta es algo que se
+pueda abrir y ver, ese otro; cuando lo que hace falta es una garantía medida y
+refutable, este.** No son el mismo argumento y no se sustituyen.
+
+### Y una cosa que este README todavía no puede decir
+
+Existe una forma más ambiciosa de describir este proyecto — la que su autor
+querría poder usar. **Está prohibida aquí hasta que exista el tramo que la
+compra**, y ese tramo no existe. Que una conversación vaya de ese tema no
+autoriza a este texto a afirmarlo: son dos cosas distintas, y confundirlas es
+exactamente el modo de fallo que el proyecto persigue en su parte técnica.
+
+Mientras tanto la frase exacta es la que aparece en §4d, y no otra: **C1 medido
+sobre un mecanismo directo**. Hay un guardián automático que revisa **todos** los
+textos publicables de este repositorio en cada corrida y pone el push en rojo si
+alguno se adelanta. La lista de textos que revisa **no está escrita a mano**: se
+deriva, porque una lista escrita a mano deja escapar al fichero nuevo.
+
+---
+
+## 8 · Cómo leer las marcas
 
 | Marca | Significa |
 |---|---|

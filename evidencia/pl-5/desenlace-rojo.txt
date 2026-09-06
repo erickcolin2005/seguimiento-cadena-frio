@@ -1,0 +1,48 @@
+
+==============================================================================
+CINTURON DE CALIDAD · ocho etapas, de la mas barata a la mas cara
+==============================================================================
+Python 3.13.14 · solo biblioteca estandar
+Instante de arranque: 2026-09-06T17:00:14+00:00
+
+==============================================================================
+EP-0 · ESTATICA · el gate de texto
+==============================================================================
+  CE-5 · digesto del banco · inventario · auto-guardia
+  CE-5 · 7 artefactos publicables revisados (lista DERIVADA, no escrita a mano) · con frase prohibida: ninguno
+  U-13 · digesto del banco 8829ea9c6300f8cc · referencia 8829ea9c6300f8cc
+  U-10 · casos enumerados: 64 · A=19 H=4 L=20 O=8 R=6 X=7
+  DL-9 · ficheros de pipeline revisados: cinturon.py, .github/workflows/cinturon.yml
+  DL-9 · patrones que anularian el veredicto: .github/workflows/cinturon.yml:50 · continue-on-error
+  SEC-7(ii) · rutas personales en la evidencia publicable: ninguna
+  FALLO: DL-9 · el pipeline contiene algo que anula su veredicto
+  -> FALLO  (0.0 s · 0 procesos)
+
+==============================================================================
+CE-2 · LA FACTURA DEL CINTURON
+==============================================================================
+  ETAPA                      SEGUNDOS   PROCESOS
+  --------------------------------------------------------------------------
+  EP-0                            0.0          0
+  --------------------------------------------------------------------------
+  TOTAL                           0.0          0
+  ejecuciones de la medicion: 0 de 3 permitidas (U-06)
+
+  Lo que este numero NO es: minutos de un proveedor de CI. Aqui no hay
+  proveedor elegido, y este proyecto no admite ninguna cifra de minutos,
+  ningun precio y ningun nombre de plan sin la cita literal de su
+  documentacion de limites. Lo medido es tiempo de pared y procesos
+  arrancados EN ESTA MAQUINA. [NV] el limite del proveedor.
+  Memoria y minutos de CPU: NO MEDIDOS. La biblioteca estandar no los
+  da de forma portable en esta plataforma y no se instala nada (CE-3).
+
+==============================================================================
+VEREDICTO DEL CINTURON: FALLO  (codigo 20)
+==============================================================================
+  · EP-0 · DL-9 · el pipeline contiene algo que anula su veredicto
+
+  Artefacto crudo: evidencia\pl-5\rojo\corrida.json
+  La tabla publicable se genera DESDE ese artefacto, nunca a mano: una
+  tabla tecleada es una tabla en la que alguien pudo elegir que filas
+  copiaba.
+ROJO EXIT=20

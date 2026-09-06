@@ -195,3 +195,50 @@ combate en su parte técnica.
 El plan exige que la ausencia **conste**; no dice **dónde**. Se publica también en
 el README, además de aquí, porque **una ausencia que solo vive en un fichero de
 evidencia no la ve el lector externo, y el lector externo es el punto**.
+
+---
+
+## 8 · Tanda 1 · segunda pasada, sobre el README completo — **NO MEDIDA**
+
+> **Desenlace: NO MEDIDO.** Tampoco esta vez hubo lector externo.
+
+El plan volvía a exigir V-1 en el tramo que produce el README completo, y ese
+tramo ya está hecho: el README tiene ahora el problema, la afirmación, la
+medición con sus dos denominadores, la calibración y las corridas que salieron
+inválidas a propósito. **Había mucho más que leer, y sigue sin haberlo leído
+nadie que no sea el autor.**
+
+Se aplica la condición 5 de §5, fijada **antes de saber el resultado**: *si
+tampoco entonces hay lector, se vuelve a declarar NO MEDIDO por escrito y se
+publica igual*. Aquí está.
+
+**Y se aplica la condición 1:** la tanda 0 de arriba **no se toca**. Sigue
+diciendo NO MEDIDA, porque eso es lo que pasó. Este apartado se añade; no
+sustituye.
+
+### Qué es distinto ahora, y qué no
+
+| | |
+|---|---|
+| **Lo que ha cambiado** | Hay mucho más texto que ofrecer, y **hay comandos que se pueden ejecutar**: la forma degradada de V-2 ya no hace falta. La pregunta *«¿por dónde entrarías?»* tiene ahora una respuesta comprobable |
+| **Lo que NO ha cambiado** | **Sigue sin haber lector.** La decisión abierta —*¿quién es?*— lleva dos tandas sin cerrarse |
+| **Lo que ya no se puede recuperar** | La tanda 0 preguntaba *«¿aguanta este planteamiento antes de que cueste algo?»*. Ya cuesta. **Esa pregunta no tiene forma de contestarse hoy**, y presentar la respuesta tardía como si la contestara sería la sustitución que §5 punto 4 prohíbe |
+
+### Las tres preguntas que este README hace suyas
+
+El README incorporó las preguntas de §2 a su propia sección de refutación, y
+añadió dos que antes no podía hacer, porque no había nada medido que atacar:
+
+- *¿Te parece que el INVÁLIDO fue honestidad o fue una excusa?*
+- *¿Te convence el denominador? Son 440 inversiones, no 1248.*
+
+**Las dos apuntan a las decisiones más discutibles del proyecto, y los dos
+números están publicados justamente para poder discutirlas.** Que estén escritas
+no las contesta: siguen esperando a alguien que no sea el autor.
+
+### El estado, sin adornos
+
+**Dos tandas, dos NO MEDIDO.** El retorno principal del proyecto sigue sin
+medirse, y esta vez con el agravante de que ya no es barato descubrir que el
+encuadre no se entiende. **No bloquea nada — y esa es exactamente la razón por la
+que lleva dos tandas sin hacerse.**

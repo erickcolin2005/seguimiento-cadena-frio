@@ -1,0 +1,25 @@
+{
+  "clases_cubiertas": 5,
+  "codigo": 0,
+  "criterio": "C1-A",
+  "digesto_guion": "fb37658608a61111cd82e8b9cdae96a383057608de8e99f083726109bb251ee1",
+  "divergencias": 0,
+  "divergencias_calibracion": 18,
+  "envios": 8,
+  "envios_con_decisivas": 7,
+  "faltas": [],
+  "inversiones_decisivas": 440,
+  "inversiones_observadas": 1248,
+  "lecturas_emitidas": 203,
+  "lotes": 10,
+  "por_clase": {
+    "IV-1": 16,
+    "IV-2": 405,
+    "IV-3": 257,
+    "IV-4": 122,
+    "IV-5": 122
+  },
+  "semilla": 20260906,
+  "sin_clase": 1,
+  "veredicto": "APROBADO"
+}

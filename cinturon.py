@@ -70,8 +70,19 @@ NOMBRE = {APROBADO: "APROBADO", FALLO: "FALLO", INVALIDO: "MEDICION INVALIDA"}
 # CE-5 · las tres expresiones que no se han ganado todavía.
 FRASES_PROHIBIDAS = ("arquitectura distribuida", "tolerante a fallos",
                      "sistema por eventos")
-PUBLICABLES = ("README.md", "NOTAS-PL2.md", "NOTAS-PL3.md", "NOTAS-PL4.md",
-               "banco/NOTAS-IMPLEMENTACION.md")
+def publicables():
+    """Todo texto publicable del repositorio, DERIVADO y no escrito a mano.
+
+    Una lista escrita a mano deja escapar al artefacto nuevo: basta con que
+    alguien olvide anadirlo, y el guardian de CE-5 no lo vera nunca. Es la misma
+    familia de defecto que una lista de exclusiones, y aqui se cierra igual —
+    no manteniendo la lista, sino no teniendola.
+    """
+    rutas = sorted(RAIZ.glob("*.md"))
+    rutas += sorted((RAIZ / "banco").glob("*.md"))
+    rutas += sorted((RAIZ / "evidencia").rglob("*.md"))
+    rutas += sorted((RAIZ / "decisiones").glob("*.md"))
+    return rutas
 
 # DL-9 · lo que la auto-guardia no puede encontrar en el pipeline. Partidos a
 # proposito: enteros, este fichero se acusaria a si mismo.
@@ -98,6 +109,53 @@ def titulo(texto):
 
 def ahora():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def donde_corrio():
+    """Dónde corrió DE VERDAD, nunca dónde se suponía que iba a correr.
+
+    La etiqueta se deriva del entorno, no de una constante escrita a mano: una
+    corrida etiquetada «CI» porque alguien lo tecleó no dice nada. Y **no lleva
+    ninguna ruta**: SEC-7 (ii) prohíbe rutas personales en el artefacto
+    publicado, y el sitio natural por donde se cuela una es justo este campo.
+    """
+    en_ci = bool(os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"))
+    return {
+        "etiqueta": ("CI · maquina efimera del proveedor" if en_ci
+                     else "maquina local del autor"),
+        "derivada_de": "variable de entorno CI/GITHUB_ACTIONS",
+        "plataforma": sys.platform,
+        "python": sys.version.split()[0],
+    }
+
+
+# SEC-7 (ii) · lo que no puede aparecer en un artefacto publicado.
+RUTAS_PERSONALES = (
+    re.compile(r"[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"']+", re.I),
+    re.compile(r"/home/[^/\s\"']+"),
+    re.compile(r"AppData", re.I),
+    re.compile(r"\\Documents\\", re.I),
+)
+
+
+def rutas_personales_en(carpeta):
+    """Toda ruta personal que aparezca en la evidencia publicable.
+
+    Se mira el CONTENIDO, no solo el campo `donde_corrio`: una ruta se cuela
+    igual de bien en un mensaje de error copiado que en un campo declarado.
+    """
+    encontradas = []
+    for ruta in sorted(Path(carpeta).rglob("*")):
+        if not ruta.is_file():
+            continue
+        try:
+            texto = ruta.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for patron in RUTAS_PERSONALES:
+            for hallazgo in patron.findall(texto):
+                encontradas.append("%s · %s" % (ruta.name, hallazgo))
+    return encontradas
 
 
 class Etapa:
@@ -165,6 +223,68 @@ def muertes_de_la_medicion(carpeta):
     return datos.get("muertes", 0) * tandas
 
 
+def bloque_sec6(carpeta):
+    """Los siete elementos que SEC-6 exige que estén EN el artefacto.
+
+    No es un resumen bonito: es la lista cerrada. **Si falta uno, SEC-6 no está
+    cumplida**, y por eso cada elemento lleva escrito qué es y qué NO es. La
+    sexta lleva su etiqueta pegada a propósito: `entrega_repetida` es evidencia
+    de REINTENTO, no de muerte en ventana, y leerla como lo segundo convertiría
+    un mecanismo funcionando en un hallazgo que no existe.
+    """
+    def leer(nombre):
+        ruta = Path(carpeta) / nombre
+        if not ruta.exists():
+            return None
+        return json.loads(ruta.read_text(encoding="utf-8"))
+
+    a, b = leer("c1a.json"), leer("c1b.json")
+    if a is None or b is None:
+        return {"completo": False,
+                "falta": "no hay artefacto de medicion del que leer los elementos"}
+    cal = b.get("calibracion")
+    return {
+        "completo": True,
+        "1_construccion_medida": {
+            "envios": b["envios"], "lotes": b["lotes"],
+            "hechos_actuables": b["hechos_actuables"],
+            "que_es": "sobre que se midio, enumerado y no declarado"},
+        "2_puntos_armados_y_muertes_por_punto": {
+            "muertes": b["muertes"], "por_instante": b["muertes_por_instante"],
+            "sin_nada_en_curso": b["muertes_sin_nada_en_curso"],
+            "que_es": "donde se mato y cuantas veces en cada punto"},
+        "3_mutantes_y_sus_anomalias": (
+            {"M-1": cal["M-1"], "M-2": cal["M-2"],
+             "total": cal["anomalias_totales"],
+             "que_es": "la refutacion: sin anomalias, la tanda no entro en la "
+                       "ventana"}
+            if cal else {"ausente": True}),
+        "4_semilla_y_digesto": {
+            "semilla": b["semilla"], "digesto_c1a": a["digesto_guion"],
+            "digesto_c1b": b["digesto_guion"],
+            "que_es": "con que se puede reproducir esto exactamente"},
+        "5_inversiones": {
+            "observadas": a["inversiones_observadas"],
+            "decisivas": a["inversiones_decisivas"],
+            "decisivas_por_clase": a["por_clase"],
+            "sin_clase": a["sin_clase"],
+            "que_es": "los DOS numeros. El denominador son las decisivas; el "
+                      "otro se publica al lado, nunca en su lugar"},
+        "6_entregas_repetidas": {
+            "veces": b["entregas_repetidas"],
+            "etiqueta": "EVIDENCIA DE REINTENTO, NO DE MUERTE EN VENTANA",
+            "que_no_es": "no son acciones duplicadas ni hechos perdidos: son "
+                         "entregas que llegaron dos veces y contaron una. Leerlas "
+                         "como muertes en ventana convertiria un mecanismo "
+                         "funcionando en un hallazgo que no existe"},
+        "7_ausencia_de_calibracion": {
+            "hay_calibracion": cal is not None,
+            "regla": "la ausencia de calibracion es MEDICION INVALIDA, jamas "
+                     "APROBADO",
+            "demostrado_en": "evidencia/pl-4/invalido/"},
+    }
+
+
 def digesto_del_banco():
     """Digesto de los casos y del mapa de mutación. Es lo que U-13 vigila."""
     h = hashlib.sha256()
@@ -196,17 +316,20 @@ def ep0_estatica(contador):
               "CE-5 · digesto del banco · inventario · auto-guardia")
     fallos = []
 
-    # CT-12 · las tres frases prohibidas, en los artefactos publicables.
-    for nombre in PUBLICABLES:
-        ruta = RAIZ / nombre
-        if not ruta.exists():
-            continue
+    # CT-12 · las tres frases prohibidas, en TODO artefacto publicable.
+    revisados = publicables()
+    con_frase = []
+    for ruta in revisados:
         bajo = ruta.read_text(encoding="utf-8").lower()
         encontradas = [f for f in FRASES_PROHIBIDAS if f in bajo]
         if encontradas:
-            fallos.append("CE-5 · %s contiene %s" % (nombre, ", ".join(encontradas)))
-    e.di("  CE-5 · %d artefactos publicables revisados, 0 frases prohibidas"
-         % len(PUBLICABLES) if not fallos else "  CE-5 · HAY FRASES PROHIBIDAS")
+            con_frase.append("%s (%s)" % (ruta.relative_to(RAIZ),
+                                          ", ".join(encontradas)))
+    e.di("  CE-5 · %d artefactos publicables revisados (lista DERIVADA, no escrita "
+         "a mano) · con frase prohibida: %s"
+         % (len(revisados), ", ".join(con_frase) if con_frase else "ninguno"))
+    if con_frase:
+        fallos.append("CE-5 · frases prohibidas en: %s" % "; ".join(con_frase))
 
     # U-13 / DL-2 · el digesto del banco contra su referencia versionada.
     actual = digesto_del_banco()
@@ -252,6 +375,15 @@ def ep0_estatica(contador):
          % (", ".join(envenenados) if envenenados else "ninguno"))
     if envenenados:
         fallos.append("DL-9 · el pipeline contiene algo que anula su veredicto")
+
+    # SEC-7 (ii) · ninguna ruta personal en lo que se publica. Mecanico, no una
+    # inspeccion que alguien tenga que acordarse de hacer.
+    personales = rutas_personales_en(RAIZ / "evidencia")
+    e.di("  SEC-7(ii) · rutas personales en la evidencia publicable: %s"
+         % (", ".join(personales[:3]) if personales else "ninguna"))
+    if personales:
+        fallos.append("SEC-7(ii) · la evidencia publicable contiene %d rutas "
+                      "personales" % len(personales))
 
     for f in fallos:
         e.di("  FALLO: %s" % f)
@@ -470,12 +602,12 @@ def main(argv=None):
         "muertes_provocadas_por_la_medicion": None,
         "ejecuciones_medicion": ejecuciones_hechas,
         "digesto_banco": digesto_del_banco(),
-        "donde_corrio": sys.platform,
-        "python": sys.version.split()[0],
+        "donde_corrio": donde_corrio(),
         "etapas": [{"codigo": e.codigo, "nombre": e.nombre,
                     "veredicto": NOMBRE[e.veredicto] if e.emitio else "NO EMITIO",
                     "motivo": e.motivo, "segundos": round(e.segundos, 1),
                     "procesos": e.procesos} for e in etapas],
+        "sec6": bloque_sec6(carpeta),
         "no_medido": ["minutos y limites del proveedor de CI",
                       "memoria y minutos de CPU",
                       "muerte de la maquina", "carga", "concurrencia externa"],

@@ -1,0 +1,37 @@
+{
+  "acciones": 56,
+  "acciones_no_actuables": 0,
+  "calibracion": {
+    "M-1": {
+      "acciones": 28,
+      "anomalias": 28,
+      "cero": 28,
+      "dos": 0
+    },
+    "M-2": {
+      "acciones": 84,
+      "anomalias": 28,
+      "cero": 0,
+      "dos": 28
+    },
+    "anomalias_totales": 56
+  },
+  "codigo": 0,
+  "criterio": "C1-B",
+  "digesto_guion": "b44638cc49990f214ecaaee8ebe20d4902b5bc2cb1e0062382d1b65f8df7d392",
+  "entregas_repetidas": 28,
+  "envios": 56,
+  "faltas": [],
+  "hechos_actuables": 56,
+  "hechos_con_cero": 0,
+  "hechos_con_dos": 0,
+  "lotes": 70,
+  "muertes": 56,
+  "muertes_por_instante": {
+    "antes_de_enviar": 28,
+    "despues_de_enviar": 28
+  },
+  "muertes_sin_nada_en_curso": 0,
+  "semilla": 20260906,
+  "veredicto": "APROBADO"
+}
