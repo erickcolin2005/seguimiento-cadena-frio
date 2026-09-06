@@ -1,16 +1,19 @@
 # Cadena de frío en transporte · P1
 
-> **Estado: hay código, y no mide la afirmación de §2.** Lo que existe es un
+> **Estado: la afirmación de §2 está medida, sobre un mecanismo directo.** Hay un
 > **banco de reglas de cadena de frío que se ejecuta** — 64 casos, trece piezas
 > apagables— y hoy su corrida termina en **VERDE**.
 >
 > Y hay **dos servicios separados que hablan**, cada uno con su almacén, cuyas
 > siete comprobaciones también pasan (§4c).
 >
-> **Ninguno de los dos verdes dice nada sobre §2.** Dicen que las reglas viven en
-> el código y nombran cuál concluyó qué, y que el recuento vive fuera del proceso
-> que muere. **Nadie ha matado todavía un proceso entre decidir y registrar**,
-> que es el único sitio donde §2 se juega algo. Nadie externo ha leído esto.
+> Y sobre eso se midió §2: **cero divergencias de orden** sobre 440 inversiones
+> que sí cambiaban la conclusión, y **exactamente una acción en 56 de 56 hechos**,
+> con 56 muertes de proceso provocadas entre decidir y registrar (§4d).
+>
+> Lo que sigue sin existir: **nadie externo ha leído esto**, no hay carga, no hay
+> nada que un transportista pueda usar, y los valores del dominio siguen siendo
+> valores de trabajo que el negocio no ha validado.
 >
 > **El verde llegó tarde y a propósito.** Durante un tramo la corrida terminó en
 > **INVÁLIDO** —ni verde ni rojo— porque una de las condiciones no se podía
@@ -58,8 +61,9 @@ eso se declara aquí en vez de disimularse. La lectura completa de ese marco
 
 ## 2 · La afirmación que este proyecto se propone medir
 
-Esta es la afirmación. **No es un resultado.** Se escribe entera y en presente
-porque así es como se va a intentar romper, no porque hoy se sostenga:
+Esta es la afirmación, escrita entera y en presente porque así es como se
+intentó romper. **Está medida en §4d, y sobre un mecanismo directo**; sobre
+cualquier otro sigue siendo solo una frase:
 
 > **El orden de los eventos de un mismo envío se respeta siempre; y una excursión
 > se actúa exactamente una vez, incluso si el proceso muere entre decidir y
@@ -89,10 +93,12 @@ que sirve esa herramienta». La redacción vigente cambia porque las dos mitades
 pasan a ser **decisiones con alternativas**, no configuración por defecto. **Si
 esta redacción tampoco aguanta, el sitio para descubrirlo es aquí y ahora.**
 
-Los números concretos con los que se medirá —cuántos casos, de cuántos envíos, con
-qué criterio de medición inválida— **existen y están fijados en el documento de
-requerimientos, fuera de este repositorio**. No se citan aquí a propósito: **un
-número de medición en un repositorio sin medición se lee como un resultado.**
+Los umbrales con los que se mide —cuántas inversiones, de cuántos envíos, cuántas
+muertes, con qué criterio de invalidez— **se fijaron antes de medir**, en el
+documento de requerimientos que vive fuera de este repositorio. Los resultados
+contra esos umbrales están en §4d. **Mientras no hubo medición no se citó ni un
+número: un número de medición en un repositorio sin medición se lee como un
+resultado.**
 
 ---
 
@@ -105,25 +111,25 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
    transportista pueda usar**: ninguna interfaz, ninguna sonda real, ningún
    envío que no salga de un guion sintético. Comprobación: listar el repositorio
    y correr los comandos de §4b y §4c.
-2. **No afirma que la afirmación de §2 se cumpla, ni en parte.** El banco mide si
-   las reglas de temperatura concluyen lo que deben y nombran cuál de ellas lo
-   concluyó. **De orden y de no duplicar acciones no mide nada**, y su propia
-   salida lo dice en la última línea. **El verde de §4b es el verde del banco de
-   reglas, y de nada más**: no hay porcentaje ni resultado sobre §2. **Cualquier
-   cifra de cumplimiento de §2 que alguien lea aquí, la habrá puesto él.**
-3. **No afirma nada sobre cómo se comportaría ante una caída en el peor
-   instante, ante carga, ni ante una interrupción.** En el banco **no muere
-   ningún proceso**: las muertes de X-01…X-07 están modeladas como decidir dos
-   veces lo mismo, que es una regla del dominio y no una caída real. En el
-   sistema **sí se mata un proceso**, pero **después de drenar y en un punto
-   tranquilo**, y solo para enseñar que el recuento vive fuera de él. Matarlo
-   entre decidir y registrar, que es donde duele, **no se ha hecho**.
+2. **No afirma que §2 se cumpla sobre ningún mecanismo que no sea el medido.**
+   §4d dice, con esas palabras, **C1 medido sobre un mecanismo directo**. Sobre
+   ese mecanismo la medida existe y está publicada con sus denominadores. Sobre
+   cualquier otro, **este repositorio no afirma nada y no lo hará hasta que ese
+   otro exista y se mida**.
+3. **No afirma nada sobre carga ni sobre concurrencia externa.** El servidor es
+   de un solo hilo a propósito, para que el camino sea reproducible, así que el
+   control de concurrencia optimista **sigue sin ejercitarse** — no roto: sin
+   probar, que no es lo mismo que estar bien. Y **no afirma nada sobre la muerte
+   de la máquina**: lo medido es la muerte del proceso. Un corte de corriente no
+   está cubierto `[NV]`.
 4. **No afirma que los valores del dominio estén validados.** Cuánto dura una
    desviación antes de contar, cuánto se tolera antes de perder el lote y cuánto
    tiempo se conserva el registro son **valores de trabajo adoptados, no
    validados por el negocio**. Están en `decisiones/decisiones-de-negocio.md` con
    la línea de quién los decidió. Uno de ellos mueve directamente el denominador
-   de la futura medición, y allí se dice cuál.
+   de §4d, y allí se dice cuál: **con otro valor, los 56 hechos actuables serían
+   otro número.** Lo que §4d mide es que el sistema aplica el valor declarado, no
+   que el valor sea el correcto.
 5. **No afirma que las cifras de temperatura vengan de la norma.** No vienen: para
    transporte, la norma no fija ninguna `[V]`. Se toman prestadas y se declara.
 6. **No afirma haber sido leído por nadie que no sea su autor.** La tanda 0 de
@@ -147,7 +153,8 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
 | Código de producto | **Ninguno.** Nada que un transportista pueda usar |
 | Banco de reglas | **Ejecutable.** 64 casos pasan; la corrida termina en **VERDE** |
 | Dos servicios con fronteras reales | **En pie.** Las siete comprobaciones de §4c pasan; **VERDE** |
-| Medición de la afirmación de §2 | **Ninguna** |
+| Medición de la afirmación de §2 | **APROBADO**, sobre un mecanismo directo · §4d |
+| Calibración de esa medición | **Hecha**, y omitirla a propósito sale INVÁLIDA |
 | Lectura por alguien externo | **NO MEDIDA** — declarada por escrito, ver `evidencia/tanda-0.md` |
 | Valores del dominio | **Cerrados como valores de trabajo**, sin validación uno a uno |
 
@@ -270,6 +277,75 @@ en **`NOTAS-PL2.md`**.
 
 ---
 
+## 4d · La afirmación de §2, medida
+
+```
+python veredicto.py
+```
+
+**APROBADO.** La salida completa está guardada en
+`evidencia/pl-3/veredicto-aprobado.txt`, y empieza así:
+
+> **C1 medido sobre un mecanismo directo.** Esta corrida no dice nada sobre
+> ningún otro mecanismo, y no lo dirá hasta que exista y se mida.
+
+| | |
+|---|---|
+| **Orden** · divergencias contra la referencia | **0** |
+| sobre inversiones que **sí** cambiaban la conclusión | **440**, en 7 envíos y las 5 clases |
+| **Exactamente una vez** · hechos con 0 acciones · con 2 | **0 · 0** |
+| sobre hechos actuables distintos · muertes de proceso | **56 · 56** |
+
+### Los dos números que nunca van separados
+
+Se barajaron lecturas hasta producir **1248 pares fuera de orden**. De esos,
+**440 cambiaban la conclusión** por sí solos; los otros 808 no cambiaban nada.
+**El denominador es 440**, no 1248: publicar el número grande sería publicar algo
+que no se midió. Barajar por barajar no mide.
+
+### Por qué el cero significa algo
+
+Un cero de divergencias puede querer decir dos cosas muy distintas: *«el orden se
+respeta»* o *«la medición no mira»*. Para separarlas, la misma medición se corre
+contra versiones **rotas a propósito**:
+
+| Se rompe | Qué pasa |
+|---|---|
+| El sistema deja de reconstruir el orden | **18 divergencias** |
+| Se marca la acción como hecha *antes* de hacerla | **28 hechos se pierden** |
+| El receptor deja de reconocer un hecho ya registrado | **28 hechos se duplican** |
+
+Las tres se rompen. **Si no se rompieran, el verde no significaría nada** — y por
+eso omitir esta calibración no da un aprobado con reservas: da **MEDICIÓN
+INVÁLIDA**. Está ejecutado a propósito y guardado en
+`evidencia/pl-3/veredicto-sin-calibracion.txt`: su **única** falta es que falta
+la calibración; todo lo demás pasó.
+
+### Lo que se ve cuando el mecanismo trabaja
+
+De las 56 muertes, 28 ocurren **después** de que el receptor haya registrado la
+acción y **antes** de que el emisor pueda anotar que lo hizo. Al revivir, el
+emisor reenvía —no tiene forma de saber que ya llegó— y el receptor reconoce el
+hecho en vez de apuntarlo dos veces. **28 entregas repetidas absorbidas, y 56
+acciones para 56 hechos.** Eso es lo que la frase de §2 dice, ejecutado.
+
+### Y lo que quedó sin comprobar, dicho en voz alta
+
+El veredicto se emite **con el emisor muerto y su puerto cerrado**: si hiciera
+falta preguntarle a él para saber cuántas acciones hay, el recuento viviría en el
+proceso que se cae, y no serviría de nada. Sale completo sin él.
+
+**Pero una de las líneas no se puede comprobar así**, y aparece con esas palabras:
+*no se pudo comprobar*. Es la que cruza de un almacén al otro. Su ausencia no
+invalida la corrida — pero **un aprobado con líneas sin comprobar es más débil, y
+tiene que verse.**
+
+El detalle está en **`NOTAS-PL3.md`**, incluidos **dos defectos del instrumento**
+que se cazaron antes de publicar nada: uno hacía que la medición midiera otra
+cosa, y otro dejaba una de las versiones rotas **sin romper, en silencio**.
+
+---
+
 ## 5 · Qué leer, y en qué orden
 
 1. **Este README** — el problema y la afirmación.
@@ -284,9 +360,13 @@ en **`NOTAS-PL2.md`**.
 
 5. **`NOTAS-PL2.md`** — qué mide cada una de las siete comprobaciones de los dos
    servicios, y las cuatro cosas que se declaran en vez de darse por cubiertas.
+6. **`NOTAS-PL3.md`** — cómo se midió §2, por qué el cero significa algo, y los
+   dos defectos del instrumento que se cazaron antes de publicar nada.
+7. **`evidencia/pl-3/`** — la salida real de las corridas, incluidas **las dos que
+   salieron inválidas a propósito**.
 
-Y dos cosas que ejecutar: `python ejecutar.py` y `python comprobar.py`. Ninguna
-de las dos deja nada instalado.
+Y tres cosas que ejecutar: `python ejecutar.py`, `python comprobar.py` y
+`python veredicto.py`. Ninguna deja nada instalado.
 
 ---
 
@@ -311,6 +391,11 @@ Y una cuarta que sí exige ejecutar, y que es la que más interesa:
    puso verde **sin que se tocara una línea de código**, solo añadiendo un dato
    — y `banco/NOTAS-IMPLEMENTACION.md` §2 dice exactamente qué se decidió **no**
    tocar mientras tanto. Esa decisión se puede atacar.
+
+5. **Ahora que §4d existe: ¿te convence el denominador?** Son 440 inversiones, no
+   1248. Si crees que quedarse con las que cambian la conclusión infla el
+   resultado —o que 1248 lo desinflaría— dilo con números: los dos están
+   publicados justamente para que se pueda discutir cuál es el bueno.
 
 **Las respuestas se transcriben sin corregir** en `evidencia/tanda-0.md`, incluidas
 las que dejen mal al planteamiento. Una respuesta editada no sirve para nada.

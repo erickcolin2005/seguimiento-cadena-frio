@@ -54,6 +54,7 @@ Codigos de salida:
 """
 
 import argparse
+import json
 import shutil
 import sys
 import tempfile
@@ -175,7 +176,12 @@ def main(argv=None):
     partes.add_argument("--semilla", type=int, default=SEMILLA_POR_DEFECTO)
     partes.add_argument("--repeticiones", type=int, default=14,
                         help="vueltas a la baraja · hacen falta >= 50 hechos actuables")
+    partes.add_argument("--sin-calibracion", action="store_true",
+                        help="OMITE las dos tandas mutantes. Tiene que salir "
+                             "MEDICION INVALIDA, jamas APROBADO (T-23).")
     partes.add_argument("--traza", action="store_true")
+    partes.add_argument("--json", default=None,
+                        help="escribe el resumen en ese fichero, para consolidar")
     args = partes.parse_args(argv)
     global VERBOSO
     VERBOSO = args.traza
@@ -190,11 +196,16 @@ def main(argv=None):
 
     correcto, muertes, sin_curso = correr_tanda(
         None, args.semilla, args.repeticiones, "correcto")
-    m1, muertes_m1, _ = correr_tanda(
-        None, args.semilla, args.repeticiones, "m1", marca_antes=True)
-    m2, muertes_m2, _ = correr_tanda(
-        None, args.semilla, args.repeticiones, "m2",
-        receptor_no_idempotente=True)
+    if args.sin_calibracion:
+        # No se corren los mutantes. El resultado NO es «aprobado sin
+        # calibracion»: es que no consta que la tanda entrara en la ventana.
+        m1 = m2 = {"acciones": 0, "ternas": []}
+    else:
+        m1, muertes_m1, _ = correr_tanda(
+            None, args.semilla, args.repeticiones, "m1", marca_antes=True)
+        m2, muertes_m2, _ = correr_tanda(
+            None, args.semilla, args.repeticiones, "m2",
+            receptor_no_idempotente=True)
 
     _, cero, dos, sobrantes = acciones_por_hecho(correcto, hechos)
     _, cero_m1, dos_m1, _ = acciones_por_hecho(m1, hechos)
@@ -206,20 +217,25 @@ def main(argv=None):
 
     # --- desenlace -----------------------------------------------------------
     faltas = []
+    if args.sin_calibracion:
+        faltas.append("T-23 · la corrida se ejecuto SIN calibracion. Sin ella no "
+                      "consta que las muertes cayeran dentro de la ventana, y "
+                      "una ausencia de calibracion es MEDICION INVALIDA, jamas "
+                      "APROBADO")
     if len(muertes) < MINIMO_MUERTES:
         faltas.append("muertes ejecutadas: %d, hacen falta %d"
                       % (len(muertes), MINIMO_MUERTES))
     if len(hechos) < MINIMO_HECHOS:
         faltas.append("hechos actuables distintos: %d, hacen falta %d"
                       % (len(hechos), MINIMO_HECHOS))
-    if anomalias < MINIMO_EN_VENTANA:
+    if not args.sin_calibracion and anomalias < MINIMO_EN_VENTANA:
         faltas.append("MI-3 · anomalias en los mutantes: %d, hacen falta %d. La "
                       "tanda no demostro haber entrado en la ventana"
                       % (anomalias, MINIMO_EN_VENTANA))
-    if anomalias_m1 < MINIMO_ANOMALIAS_POR_MUTANTE:
+    if not args.sin_calibracion and anomalias_m1 < MINIMO_ANOMALIAS_POR_MUTANTE:
         faltas.append("U-05 · M-1 aporto %d anomalias, hacen falta %d"
                       % (anomalias_m1, MINIMO_ANOMALIAS_POR_MUTANTE))
-    if anomalias_m2 < MINIMO_ANOMALIAS_POR_MUTANTE:
+    if not args.sin_calibracion and anomalias_m2 < MINIMO_ANOMALIAS_POR_MUTANTE:
         faltas.append("U-05 · M-2 aporto %d anomalias, hacen falta %d"
                       % (anomalias_m2, MINIMO_ANOMALIAS_POR_MUTANTE))
     if sin_curso:
@@ -231,6 +247,30 @@ def main(argv=None):
         veredicto, codigo = "FALLO", 1
     else:
         veredicto, codigo = "APROBADO", 0
+
+    if args.json:
+        Path(args.json).write_text(json.dumps({
+            "criterio": "C1-B", "veredicto": veredicto, "codigo": codigo,
+            "semilla": args.semilla, "digesto_guion": guion_ref.digesto,
+            "envios": len(guion_ref.guion["envios"]), "lotes": len(ref["lotes"]),
+            "hechos_actuables": len(hechos),
+            "muertes": len(muertes),
+            "muertes_por_instante": {i: sum(1 for m in muertes if m["instante"] == i)
+                                     for i in INSTANTES},
+            "muertes_sin_nada_en_curso": sin_curso,
+            "acciones": correcto["acciones"],
+            "hechos_con_cero": len(cero), "hechos_con_dos": len(dos),
+            "acciones_no_actuables": len(sobrantes),
+            "entregas_repetidas": correcto.get("entregas_repetidas", 0),
+            "calibracion": None if args.sin_calibracion else {
+                "M-1": {"acciones": m1["acciones"], "cero": len(cero_m1),
+                        "dos": len(dos_m1), "anomalias": anomalias_m1},
+                "M-2": {"acciones": m2["acciones"], "cero": len(cero_m2),
+                        "dos": len(dos_m2), "anomalias": anomalias_m2},
+                "anomalias_totales": anomalias,
+            },
+            "faltas": faltas,
+        }, indent=2, sort_keys=True), encoding="utf-8")
 
     print()
     print("VEREDICTO C1-B: %s" % veredicto)

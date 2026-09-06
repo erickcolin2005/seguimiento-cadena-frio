@@ -1,0 +1,81 @@
+Midiendo las dos mitades de C1. Esto tarda: C1-B mata procesos de verdad.
+  C1-A: APROBADO
+  C1-B: APROBADO
+  SEC-5: deteniendo SV-1 y pidiendo el veredicto sin el...
+
+VEREDICTO DE LA CORRIDA: APROBADO
+==============================================================================
+C1 · el orden de los eventos de un mismo envio se respeta siempre; y una
+excursion se actua exactamente una vez, incluso si el proceso muere
+entre decidir y registrar.
+
+C1 MEDIDO SOBRE UN MECANISMO DIRECTO. Esta corrida no dice nada sobre
+ningun otro mecanismo, y no lo dira hasta que exista y se mida.
+==============================================================================
+semilla: 20260906
+digesto del guion · C1-A: fb37658608a61111cd82e8b9cdae96a383057608de8e99f083726109bb251ee1
+digesto del guion · C1-B: b44638cc49990f214ecaaee8ebe20d4902b5bc2cb1e0062382d1b65f8df7d392
+
+==============================================================================
+LOS DENOMINADORES · se imprimen siempre, midiera o no
+==============================================================================
+  C1-A · inversiones OBSERVADAS ....... 1248
+  C1-A · inversiones DECISIVAS ........ 440   <- el denominador
+  C1-A · envios con decisiva .......... 7
+  C1-A · clases cubiertas ............. 5 de 5
+           IV-1     16
+           IV-2    405
+           IV-3    257
+           IV-4    122
+           IV-5    122
+  C1-B · hechos actuables distintos ... 56
+  C1-B · muertes ejecutadas ........... 56
+  C1-B · muertes sin nada en curso .... 0
+
+==============================================================================
+LO MEDIDO
+==============================================================================
+  C1-A · divergencias contra la referencia ....... 0
+  C1-B · acciones contadas en el receptor ........ 56
+  C1-B · hechos con 0 acciones ................... 0
+  C1-B · hechos con >= 2 acciones ................ 0
+  C1-B · acciones sobre hechos NO actuables ...... 0
+  C1-B · entregas repetidas absorbidas ........... 28
+
+==============================================================================
+LA CALIBRACION · sin ella no hay aprobado, solo invalidez
+==============================================================================
+  C1-A · divergencias con el orden sin reconstruir ... 18
+  C1-B · M-1 marca antes de enviar · anomalias ....... 28
+  C1-B · M-2 receptor no idempotente · anomalias ..... 28
+  C1-B · anomalias totales .......................... 56
+
+==============================================================================
+SEC-5 · el veredicto es computable con SV-1 DETENIDO
+==============================================================================
+  SV-1 detenido ................ si
+  su puerto ya no acepta ....... si
+  recuento obtenido sin el ..... si (4 acciones)
+  contado como ................. count(*) sobre la tabla accion · sin columna contador
+  rutas que este veredicto pide: /bandeja, /drenar, /recuentos
+  el numero sale de /recuentos, que es de SV-2. Contar en /bandeja
+  esta prohibido (T-06): pondria el recuento en el proceso que muere.
+
+  B-2 · que una intencion comprometida no deje de ser accion
+     con SV-1 en pie ... CUMPLIDA · 4 entradas de bandeja, todas entregadas y con su fila en el libro
+     con SV-1 detenido . NO SE PUDO COMPROBAR
+        SV-1 esta detenido y la bandeja vive en su almacen. El cruce atraviesa la frontera entre AL-1 y AL-2, asi que no hay forma de hacerlo desde fuera. No invalida la corrida (MI-5 solo mira al receptor), pero se publica.
+     Esta linea queda como NO COMPROBADA y se publica con esas
+     palabras. Un APROBADO con lineas sin comprobar es mas debil
+     y tiene que verse.
+
+==============================================================================
+VEREDICTO DE LA CORRIDA: APROBADO
+==============================================================================
+
+Lo que esta corrida NO permite afirmar: nada sobre ningun mecanismo que
+no sea el medido, y nada fuera de C1. No hay carga, no hay concurrencia
+externa y no hay lector externo.
+
+Evidencia guardada en evidencia\pl-3
+EXIT=0

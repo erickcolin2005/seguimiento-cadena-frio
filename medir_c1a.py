@@ -34,6 +34,7 @@ Codigos de salida:
 """
 
 import argparse
+import json
 import random
 import shutil
 import sys
@@ -132,6 +133,8 @@ def main(argv=None):
     partes.add_argument("--semilla", type=int, default=SEMILLA_POR_DEFECTO)
     partes.add_argument("--repeticiones", type=int, default=2,
                         help="vueltas a la baraja de perfiles · 4 envios cada una")
+    partes.add_argument("--json", default=None,
+                        help="escribe el resumen en ese fichero, para consolidar")
     args = partes.parse_args(argv)
 
     directorio = Path(tempfile.mkdtemp(prefix="c1a-"))
@@ -198,6 +201,22 @@ def main(argv=None):
         veredicto, codigo = "FALLO", 1
     else:
         veredicto, codigo = "APROBADO", 0
+
+    if args.json:
+        Path(args.json).write_text(json.dumps({
+            "criterio": "C1-A", "veredicto": veredicto, "codigo": codigo,
+            "semilla": args.semilla, "digesto_guion": orquesta.digesto,
+            "envios": len(orquesta.guion["envios"]), "lotes": len(ref["lotes"]),
+            "lecturas_emitidas": emitidas,
+            "inversiones_observadas": observadas,
+            "inversiones_decisivas": decisivas,
+            "envios_con_decisivas": envios_con_decisivas,
+            "clases_cubiertas": clases_cubiertas,
+            "por_clase": por_clase, "sin_clase": sin_clase,
+            "divergencias": len(divergencias),
+            "divergencias_calibracion": len(divergencias_mutante),
+            "faltas": faltas,
+        }, indent=2, sort_keys=True), encoding="utf-8")
 
     print("VEREDICTO C1-A: %s" % veredicto)
     print("=" * ANCHO)
