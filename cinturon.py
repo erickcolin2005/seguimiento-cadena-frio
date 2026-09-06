@@ -51,6 +51,7 @@ exclusiones es justo el sitio por donde una comprobación se queda ciega**.
 """
 
 import argparse
+import ast
 import hashlib
 import json
 import os
@@ -440,6 +441,29 @@ def ep3_preflight(contador):
     if not (tiene_m1 and tiene_m2):
         return e.resolver(INVALIDO, "falta alguno de los dos mutantes: sin los dos "
                                     "la calibracion no puede demostrar la ventana")
+
+    # La garantia NO puede vivir en el transporte. Se comprueba por estructura y
+    # no de palabra: un adaptador SIN memoria no puede deduplicar aunque quiera.
+    # Si pudiera, cambiar de transporte cambiaria la garantia -- y entonces M11
+    # no seria cambiar un adaptador, seria rediseñar.
+    fuente = (RAIZ / "sistema" / "transporte.py").read_text(encoding="utf-8")
+    arbol = ast.parse(fuente)
+    importa = set()
+    for nodo in ast.walk(arbol):
+        if isinstance(nodo, ast.Import):
+            importa.update(a.name.split(".")[0] for a in nodo.names)
+        elif isinstance(nodo, ast.ImportFrom) and nodo.module:
+            importa.add(nodo.module.split(".")[0])
+        elif isinstance(nodo, ast.ImportFrom) and nodo.level:
+            importa.update(a.name for a in nodo.names)
+    prohibidos = sorted(importa & {"sqlite3", "almacen", "motor", "banco"})
+    e.di("  el transporte importa: %s" % ", ".join(sorted(importa)))
+    e.di("  de eso, memoria o reglas: %s"
+         % (", ".join(prohibidos) if prohibidos else "nada"))
+    if prohibidos:
+        return e.resolver(FALLO, "la garantia se filtro al transporte: importa %s, "
+                                 "asi que podria deduplicar u ordenar por su cuenta"
+                          % ", ".join(prohibidos))
     return e.resolver(APROBADO)
 
 

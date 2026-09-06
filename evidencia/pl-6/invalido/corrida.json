@@ -1,0 +1,110 @@
+{
+  "codigo": 30,
+  "digesto_banco": "8829ea9c6300f8cc249fb0f5b3e08b29f90ccc219069bb706f307a5a11de3aba",
+  "donde_corrio": {
+    "derivada_de": "variable de entorno CI/GITHUB_ACTIONS",
+    "etiqueta": "maquina local del autor",
+    "plataforma": "win32",
+    "python": "3.13.14"
+  },
+  "ejecuciones_medicion": 1,
+  "etapas": [
+    {
+      "codigo": "EP-0",
+      "motivo": "",
+      "nombre": "ESTATICA \u00b7 el gate de texto",
+      "procesos": 0,
+      "segundos": 0.0,
+      "veredicto": "APROBADO"
+    },
+    {
+      "codigo": "EP-1+2",
+      "motivo": "",
+      "nombre": "BANCO Y MUTACION POR REGLA",
+      "procesos": 1,
+      "segundos": 15.0,
+      "veredicto": "APROBADO"
+    },
+    {
+      "codigo": "EP-3",
+      "motivo": "",
+      "nombre": "PREFLIGHT DE LA MEDICION",
+      "procesos": 1,
+      "segundos": 0.5,
+      "veredicto": "APROBADO"
+    },
+    {
+      "codigo": "EP-4..7",
+      "motivo": "\u00b7 MI-3 \u00b7 la corrida no trae calibracion. Sin ella no consta que la tanda entrara en la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO (T-23)",
+      "nombre": "C1-A \u00b7 C1-B \u00b7 CALIBRACION \u00b7 SEC-5",
+      "procesos": 1,
+      "segundos": 88.4,
+      "veredicto": "MEDICION INVALIDA"
+    }
+  ],
+  "instante": "2026-09-06T17:54:06+00:00",
+  "motivos": [
+    "EP-4..7 \u00b7 \u00b7 MI-3 \u00b7 la corrida no trae calibracion. Sin ella no consta que la tanda entrara en la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO (T-23)"
+  ],
+  "muertes_provocadas_por_la_medicion": 56,
+  "no_medido": [
+    "minutos y limites del proveedor de CI",
+    "memoria y minutos de CPU",
+    "muerte de la maquina",
+    "carga",
+    "concurrencia externa"
+  ],
+  "procesos_directos": 3,
+  "sec6": {
+    "1_construccion_medida": {
+      "envios": 56,
+      "hechos_actuables": 56,
+      "lotes": 70,
+      "que_es": "sobre que se midio, enumerado y no declarado"
+    },
+    "2_puntos_armados_y_muertes_por_punto": {
+      "muertes": 56,
+      "por_instante": {
+        "antes_de_enviar": 28,
+        "despues_de_enviar": 28
+      },
+      "que_es": "donde se mato y cuantas veces en cada punto",
+      "sin_nada_en_curso": 0
+    },
+    "3_mutantes_y_sus_anomalias": {
+      "ausente": true
+    },
+    "4_semilla_y_digesto": {
+      "digesto_c1a": "fb37658608a61111cd82e8b9cdae96a383057608de8e99f083726109bb251ee1",
+      "digesto_c1b": "b44638cc49990f214ecaaee8ebe20d4902b5bc2cb1e0062382d1b65f8df7d392",
+      "que_es": "con que se puede reproducir esto exactamente",
+      "semilla": 20260906
+    },
+    "5_inversiones": {
+      "decisivas": 440,
+      "decisivas_por_clase": {
+        "IV-1": 16,
+        "IV-2": 405,
+        "IV-3": 257,
+        "IV-4": 122,
+        "IV-5": 122
+      },
+      "observadas": 1248,
+      "que_es": "los DOS numeros. El denominador son las decisivas; el otro se publica al lado, nunca en su lugar",
+      "sin_clase": 1
+    },
+    "6_entregas_repetidas": {
+      "etiqueta": "EVIDENCIA DE REINTENTO, NO DE MUERTE EN VENTANA",
+      "que_no_es": "no son acciones duplicadas ni hechos perdidos: son entregas que llegaron dos veces y contaron una. Leerlas como muertes en ventana convertiria un mecanismo funcionando en un hallazgo que no existe",
+      "veces": 28
+    },
+    "7_ausencia_de_calibracion": {
+      "demostrado_en": "evidencia/pl-4/invalido/",
+      "hay_calibracion": false,
+      "regla": "la ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO"
+    },
+    "completo": true
+  },
+  "segundos_total": 104.0,
+  "veredicto": "MEDICION INVALIDA"
+}

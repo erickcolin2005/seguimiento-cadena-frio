@@ -358,16 +358,16 @@ python cinturon.py
 Ocho etapas **de la más barata a la más cara**. La primera no arranca un solo
 proceso y aun así puede poner rojo el push entero; la última mata ciento sesenta
 y ocho. Esta tabla **no está tecleada**: se genera desde el artefacto crudo de la
-corrida con `python tabla.py evidencia/pl-5/verde/corrida.json`, y si no se pudiera regenerar, la publicación no
+corrida con `python tabla.py evidencia/pl-6/verde/corrida.json`, y si no se pudiera regenerar, la publicación no
 valdría.
 
 | Etapa | Qué corre | Desenlace | Segundos |
 |---|---|---|---|
 | **EP-0** | ESTATICA · el gate de texto | **APROBADO** | 0.0 |
-| **EP-1+2** | BANCO Y MUTACION POR REGLA | **APROBADO** | 16.0 |
+| **EP-1+2** | BANCO Y MUTACION POR REGLA | **APROBADO** | 15.9 |
 | **EP-3** | PREFLIGHT DE LA MEDICION | **APROBADO** | 0.5 |
-| **EP-4..7** | C1-A · C1-B · CALIBRACION · SEC-5 | **APROBADO** | 227.1 |
-| | **TOTAL** | **APROBADO** | **243.6** |
+| **EP-4..7** | C1-A · C1-B · CALIBRACION · SEC-5 | **APROBADO** | 230.3 |
+| | **TOTAL** | **APROBADO** | **246.7** |
 
 ### Tres desenlaces, no dos
 
@@ -401,7 +401,7 @@ salir distinto.
 
 ### Lo que cuesta, y lo que no se sabe
 
-La corrida completa tarda **243,6 segundos** en esta máquina. **Eso no son minutos
+La corrida completa tarda **246,7 segundos** en esta máquina. **Eso no son minutos
 de un proveedor de CI**: no hay proveedor elegido, y aquí no entra ninguna cifra
 de minutos, ningún precio ni ningún nombre de plan **sin la cita literal de su
 documentación**. En este portafolio ya murió una premisa así, y costó horas.
@@ -508,7 +508,15 @@ refutable, este.** No son el mismo argumento y no se sustituyen.
 
 Existe una forma más ambiciosa de describir este proyecto — la que su autor
 querría poder usar. **Está prohibida aquí hasta que exista el tramo que la
-compra**, y ese tramo no existe. Que una conversación vaya de ese tema no
+compra**, y ese tramo no existe.
+
+Lo que sí existe es **el sitio por donde ese tramo entraría**: la pieza que envía
+la acción está aislada detrás de una costura, y hay una comprobación automática
+de que **no guarda nada** — sin memoria no puede decidir por su cuenta si algo ya
+llegó, así que la garantía no puede haberse escondido ahí. **Lo que todavía no
+está comprobado es que la costura aguante el cambio**, porque no se ha cambiado
+nada por ella todavía. Decir lo contrario sería justo lo que este repositorio
+evita. Que una conversación vaya de ese tema no
 autoriza a este texto a afirmarlo: son dos cosas distintas, y confundirlas es
 exactamente el modo de fallo que el proyecto persigue en su parte técnica.
 

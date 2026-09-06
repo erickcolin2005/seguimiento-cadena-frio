@@ -35,7 +35,7 @@ from banco import dominio, motor, reloj
 from banco.motor import RegistroAcciones
 from banco.piezas import Interruptores
 
-from . import almacen, guion as modulo_guion, protocolo
+from . import almacen, guion as modulo_guion, protocolo, transporte
 
 CLASES_ACTUABLES = ("RESCATE", "DISPOSICION")
 
@@ -46,7 +46,7 @@ def _ahora():
 
 class Servicio:
     def __init__(self, con, guion, corrida_id, url_sv2, reconstruye_orden=True,
-                 marca_antes_de_enviar=False):
+                 marca_antes_de_enviar=False, clase_transporte="directo"):
         self.con = con
         # El mutante de C1-A. Apagarlo hace que SV-1 trate la posicion de LLEGADA
         # como si fuera el instante en que ocurrio -- que es lo que hace un
@@ -60,6 +60,10 @@ class Servicio:
         self.guion = guion
         self.corrida_id = corrida_id
         self.url_sv2 = url_sv2
+        # La costura: SV-1 no sabe COMO viaja la accion, solo que viaja y que le
+        # devuelven un desenlace. La garantia no esta aqui ni esta ahi dentro:
+        # esta en la bandeja y en la clave de la terna.
+        self.transporte = transporte.construir(clase_transporte, url_sv2)
         self.sw = Interruptores()
         self.lotes_por_envio = {e["envio_id"]: e["lotes"] for e in guion["envios"]}
         self._sembrar_catalogo()
@@ -355,7 +359,7 @@ class Servicio:
                 sys.stdout.flush()
                 os._exit(9)
             try:
-                codigo, respuesta = protocolo.pedir(self.url_sv2, "/acciones", cuerpo)
+                codigo, respuesta = self.transporte.entregar(cuerpo)
             except Exception as error:              # noqa: BLE001
                 fallidas.append({"terna": [fila["lote_id"],
                                            fila["secuencia_apertura"], fila["clase"]],
@@ -367,7 +371,7 @@ class Servicio:
                 sys.stdout.flush()
                 os._exit(9)
             desenlace = respuesta.get("desenlace")
-            if desenlace in ("registrada", "ya_registrada"):
+            if desenlace in (transporte.REGISTRADA, transporte.YA_REGISTRADA):
                 if not self.marca_antes_de_enviar:
                     self._marcar_entregada(fila)
                 entregadas += 1
@@ -379,7 +383,7 @@ class Servicio:
                                    "desenlace": desenlace, "codigo": codigo})
         return 200, {"desenlace": "drenada", "pendientes_al_empezar": len(pendientes),
                      "entregadas": entregadas, "rechazadas": rechazadas,
-                     "fallidas": fallidas}
+                     "fallidas": fallidas, "por": self.transporte.describir()}
 
     def conclusiones(self):
         """Lo que SV-1 concluyo, por lote. Es lo que C1-A compara.
@@ -421,7 +425,8 @@ class Servicio:
         if metodo == "GET" and camino == "/salud":
             return 200, {"servicio": "SV-1", "papel": "nucleo de reglas",
                          "estado": "vivo", "corrida_id": self.corrida_id,
-                         "digesto_guion": modulo_guion.digesto(self.guion)}
+                         "digesto_guion": modulo_guion.digesto(self.guion),
+                         "transporte": self.transporte.describir()}
         if metodo == "GET" and camino == "/bandeja":
             return self.bandeja()
         if metodo == "GET" and camino == "/conclusiones":
@@ -445,6 +450,8 @@ def main(argv=None):
     partes.add_argument("--corrida", required=True)
     partes.add_argument("--sv2", required=True, help="URL base de SV-2")
     partes.add_argument("--repeticiones", type=int, default=1)
+    partes.add_argument("--transporte", default="directo",
+                        help="que adaptador de transporte usa el drenaje")
     partes.add_argument("--marca-antes-de-enviar", action="store_true",
                         help="MUTANTE: marca la entrada entregada antes de "
                              "entregarla. Para la calibracion de C1-B.")
@@ -463,7 +470,8 @@ def main(argv=None):
     con = almacen.abrir_al1(almacen.ruta_al1(args.directorio))
     servicio = Servicio(con, g, args.corrida, args.sv2,
                         reconstruye_orden=not args.sin_reconstruccion_de_orden,
-                        marca_antes_de_enviar=args.marca_antes_de_enviar)
+                        marca_antes_de_enviar=args.marca_antes_de_enviar,
+                        clase_transporte=args.transporte)
     if args.marca_antes_de_enviar:
         print("SV-1 ARRANCA MUTADO: marca antes de enviar", flush=True)
     if args.sin_reconstruccion_de_orden:

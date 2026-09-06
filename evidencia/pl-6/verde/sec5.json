@@ -1,0 +1,15 @@
+{
+  "acciones_con_sv1_detenido": 4,
+  "b2_con_sv1": [
+    "cumplida",
+    "4 entradas de bandeja, todas entregadas y con su fila en el libro"
+  ],
+  "b2_sin_sv1": [
+    "no se pudo comprobar",
+    "SV-1 esta detenido y la bandeja vive en su almacen. El cruce atraviesa la frontera entre AL-1 y AL-2, asi que no hay forma de hacerlo desde fuera. No invalida la corrida (MI-5 solo mira al receptor), pero se publica."
+  ],
+  "contado_como": "count(*) sobre la tabla accion \u00b7 sin columna contador",
+  "puerto_sv1_cerrado": true,
+  "recuento_obtenido": true,
+  "sv1_detenido": true
+}

@@ -1,0 +1,53 @@
+Midiendo C1-B. Tres tandas con las mismas muertes: el sistema y sus dos
+mutantes. Esto tarda -- son muchos procesos que nacen y mueren.
+
+VEREDICTO C1-B: MEDICION INVALIDA
+==============================================================================
+C1-B · una excursion se actua exactamente una vez, incluso si el
+proceso muere entre decidir y registrar.
+Medido sobre un mecanismo directo. NO sobre ningun otro.
+==============================================================================
+semilla: 20260906 · digesto del guion: b44638cc49990f214ecaaee8ebe20d4902b5bc2cb1e0062382d1b65f8df7d392
+envios: 56 · lotes: 70
+
+-- LOS DENOMINADORES --------------------------------------------------------
+  hechos actuables distintos ... 56   (hacen falta 50)
+  muertes ejecutadas ........... 56   (hacen falta 50)
+  muertes sin nada en curso .... 0   (MI-4: tienen que ser 0)
+    en antes_de_enviar    28
+    en despues_de_enviar  28
+
+-- EL SISTEMA CORRECTO ------------------------------------------------------
+  acciones contadas en SV-2 .... 56
+  hechos con 0 acciones ........ 0 
+  hechos con >= 2 acciones ..... 0 
+  acciones sobre hechos NO actuables 0 
+  entregas repetidas absorbidas . 28  (llegaron dos veces, cuentan una)
+
+-- LA CALIBRACION · la ventana se refuta, no se observa ---------------------
+  TANDA                          ACCIONES  0 ACC. >=2 ACC. ANOMALIAS
+  --------------------------------------------------------------------------
+  el sistema correcto                 56       0        0         -
+  M-1 · marca antes de enviar          0      56        0        56
+  M-2 · receptor no idempotente        0      56        0        56
+  --------------------------------------------------------------------------
+  anomalias totales: 112  (hacen falta 20 para demostrar la ventana)
+  por mutante hacen falta 5 (U-05): M-1 si · M-2 si
+
+  Si los dos mutantes sobrevivieran limpios, la tanda habria matado
+  antes o despues de la ventana y el verde del sistema correcto no
+  significaria nada. Por eso esto no es un extra: es parte de la medida.
+
+==============================================================================
+VEREDICTO C1-B: MEDICION INVALIDA
+
+Que falto:
+  · T-23 · la corrida se ejecuto SIN calibracion. Sin ella no consta que las muertes cayeran dentro de la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO
+
+MEDICION INVALIDA NO ES UN DEFECTO DEL SISTEMA MEDIDO. Es que esta
+corrida no consiguio matar donde tenia que matar, y por tanto no puede
+decir nada -- ni bueno ni malo-- sobre si se actua exactamente una vez.
+==============================================================================
+
+Lo que esta corrida NO mide: la mitad de orden de D2. Aqui las lecturas
+llegan en orden. Eso es C1-A.

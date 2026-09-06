@@ -1,0 +1,25 @@
+{
+  "acciones": 56,
+  "acciones_no_actuables": 0,
+  "calibracion": null,
+  "codigo": 2,
+  "criterio": "C1-B",
+  "digesto_guion": "b44638cc49990f214ecaaee8ebe20d4902b5bc2cb1e0062382d1b65f8df7d392",
+  "entregas_repetidas": 28,
+  "envios": 56,
+  "faltas": [
+    "T-23 \u00b7 la corrida se ejecuto SIN calibracion. Sin ella no consta que las muertes cayeran dentro de la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO"
+  ],
+  "hechos_actuables": 56,
+  "hechos_con_cero": 0,
+  "hechos_con_dos": 0,
+  "lotes": 70,
+  "muertes": 56,
+  "muertes_por_instante": {
+    "antes_de_enviar": 28,
+    "despues_de_enviar": 28
+  },
+  "muertes_sin_nada_en_curso": 0,
+  "semilla": 20260906,
+  "veredicto": "MEDICION INVALIDA"
+}
