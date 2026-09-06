@@ -179,7 +179,8 @@ def main():
     print("       pieza apagada es distinta de la de las otras doce")
     print("  (c1) localizacion: todo caso que cambia de VALOR es un caso donde la")
     print("       propia regla de la pieza dejo de firmar algo")
-    print("  (c2) extension: hasta donde puede llegar la cascada · NO EVALUABLE")
+    print("  (c2) extension: ningun valor cambiado lo firma una regla que la")
+    print("       cascada declarada por el banco no alcanza")
     print("  La columna 'fuera de §8' es informativa: §8 es limite INFERIOR, no")
     print("  superior. Caer fuera de la lista no es, por si solo, un defecto.")
 
@@ -222,8 +223,9 @@ def main():
     print("      -> (c1) se pone roja: %s" % ("SI" if muerde_c1 else "NO"))
     muerde_c2, rojas_c2 = mutacion.diente_de_extension(
         casos, mapa, PIEZAS, base, apagadas)
-    print("  (c2) contra una cascada declarada VACIA · se ejerce aunque hoy (c2)")
-    print("       no se evalue, para que no llegue verde sin haberse visto roja:")
+    print("  (c2) contra una cascada declarada VACIA · con la cascada vacia")
+    print("       ninguna regla alimenta a otra, asi que toda cascada real del")
+    print("       dominio tiene que aparecer como fuera de lo declarado:")
     print("      %d piezas se ponen rojas: %s"
           % (len(rojas_c2), ", ".join("%s (%d)" % r for r in rojas_c2[:6])
              + (" ..." if len(rojas_c2) > 6 else "")))

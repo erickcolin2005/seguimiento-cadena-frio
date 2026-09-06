@@ -9,10 +9,18 @@ Marcas: `[M]` medido en esta corrida · `[V]` verificado ejecutando ·
 
 ---
 
-## 1 · El desenlace de PL-1 es INVÁLIDO, y es lo correcto
+## 1 · El desenlace de PL-1 es VERDE, y estuvo en INVÁLIDO hasta que llegó un dato
 
-`python ejecutar.py` termina con **código 2 · INVÁLIDO**. No es un verde y no es
-un rojo.
+`python ejecutar.py` termina con **código 0 · VERDE**.
+
+**No siempre.** Durante un tramo terminó en **código 2 · INVÁLIDO** —ni verde ni
+rojo— porque la condición (c2) no era evaluable sin la relación regla→regla que
+solo el banco puede declarar. Lo que la sacó de ahí **no fue tocar la condición
+ni el código**: fue que `analyst-agent` declarara las doce filas de
+`cascada-aguas-abajo.md`, que se transcribieron a `mapa-mutacion.json` como dato.
+**La condición no se relajó: se alimentó.** El recorrido está en §2 y se deja
+escrito porque es la única parte de este tramo que demuestra algo en vez de
+afirmarlo.
 
 | | |
 |---|---|
@@ -22,14 +30,18 @@ un rojo.
 | Criterio 3 · (a) sensibilidad | **13/13** `[M]` |
 | Criterio 3 · (b) discriminación | **13/13** `[M]` — *con la redacción vigente; con la anterior, 0/13. Ver el recuadro de §2* |
 | Criterio 3 · (c1) localización | **13/13** `[M]` |
-| Criterio 3 · (c2) extensión de la cascada | **NO EVALUABLE en las 13** — falta `cascada_declarada` `[M]` |
+| Criterio 3 · (c2) extensión de la cascada | **13/13** `[M]` — *estuvo NO EVALUABLE en las 13 mientras faltó `cascada_declarada`* |
 | Criterio 4 · `tipo_producto` vive en el lote | **PASA** `[M]` |
 | Criterio 5 · un solo comando, sin dependencias | **PASA** `[M]` |
 
-Lo que falla no es el banco: es que **la condición (c) no se puede evaluar con
-el mapa de mutación vigente**. Publicar eso como rojo diría que el código está
-mal, y no lo está. Publicarlo como verde diría que la condición se comprobó, y
-no se comprobó. Por eso hay un tercer desenlace.
+**Y las cuatro condiciones se ejercen contra defectos fabricados en cada
+corrida** —fusionar las dos mitades de RC-08, acoplar RC-10 con RC-03, declarar
+una cascada vacía— y el resultado se publica. Si alguna no consigue ponerse roja,
+la corrida es **ROJA por defecto del cinturón**: *una comprobación que no se ha
+visto fallar no está demostrado que mida.*
+
+**Lo que este verde NO dice.** Nada sobre orden y nada sobre no duplicar
+acciones — ver §5, que no ha cambiado.
 
 ---
 
@@ -130,9 +142,45 @@ comprobó caso por caso cuál es cuál.
 > hay nada que separar. Lo que sí queda medido es que **(a) se cumple 13/13**,
 > es decir que ningún caso listado sobrevive.
 >
-> **El desenlace sigue siendo INVÁLIDO**, con un motivo más estrecho: **falta
-> `cascada_declarada` en `mapa-mutacion.json`**, que es un dato de
-> `analyst-agent`. El encargo exacto está en `cinturon-calidad.md` §9.
+> **El desenlace quedó en INVÁLIDO**, con un motivo más estrecho: **faltaba
+> `cascada_declarada` en `mapa-mutacion.json`**, un dato de `analyst-agent`. El
+> encargo está en `cinturon-calidad.md` §9.
+>
+> ### CERRADO por `analyst-agent` · `cascada-aguas-abajo.md`
+>
+> **La relación resultó declarable: doce filas, cero indeclarables**, cada una
+> con su razón y su cita en el banco. Ninguna arista salió del código — deducirla
+> del código habría sido medir el código contra sí mismo.
+>
+> **Confirmó el supuesto de `qa-agent` en el fondo y lo corrigió en el salto:**
+> RC-12 sí mueve el acumulado y el número de regla no lo ve, pero **no alimenta a
+> RC-07 directamente** — aporta el instante de cierre, **RC-06** lo convierte en
+> duración y RC-07 suma duraciones. El banco ya lo firmaba con las dos juntas
+> (L-14: `RC-06 + RC-12`). Para (c2) es indiferente; para refutarlo no.
+>
+> **La arista menos obvia es `RC-06 → RC-05`, la única hacia atrás en número**:
+> RC-05 no puede decidir si un tramo llegó al mínimo sin saber dónde termina
+> (L-10 abre con 5 min, L-11 no abre con 4). Se derivó de esos dos casos, y **la
+> medición de esta corrida la corrobora por vía independiente**: son exactamente
+> los 7 casos que el orden numérico marcaba como falsa contaminación en RC-06.
+>
+> **Un hallazgo de transcripción que evitó un rojo falso** `[V — verificado en
+> `mutacion.py`]`: `revisar_pieza` construye el conjunto permitido con **un solo
+> salto** y no calcula cierre transitivo. Con la tabla directa, apagar RC-04
+> habría marcado como contaminación todo lo firmado por RC-07…RC-10 —cascada
+> legítima— y (c2) habría salido roja sobre código correcto. Por eso lo que se
+> transcribe es **el cierre**, y se comprobó que las doce filas coinciden con el
+> cierre transitivo de la relación directa.
+>
+> **Dónde (c2) apenas discrimina, declarado en vez de escondido:** en RC-01,
+> RC-02 y RC-03 la cascada permite 10, 9 y 8 reglas de 11. No es un defecto de la
+> declaración; es la forma del dominio — son puertas aguas arriba de todo.
+>
+> **Un hueco que ninguna condición cubre, y conviene no perderlo de vista:**
+> `duracion`, `abierta`, `transitoria`, `provisional`, `conocido_hasta` y
+> `conservada` **no llevan identificador de regla**, así que un acoplamiento que
+> solo mueva esos campos es invisible a (c2) — y `duracion` es dominio de primera
+> línea.
 
 ---
 

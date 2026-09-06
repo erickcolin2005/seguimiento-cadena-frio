@@ -2,12 +2,19 @@
 
 > **Estado: hay código, y no mide la afirmación de §2.** Lo que existe es un
 > **banco de reglas de cadena de frío que se ejecuta** — 64 casos, trece piezas
-> apagables— y su corrida termina hoy en **INVÁLIDO**, ni verde ni rojo, por un
-> motivo que está escrito en `banco/NOTAS-IMPLEMENTACION.md`.
+> apagables— y hoy su corrida termina en **VERDE**.
 >
-> **Nada de la afirmación de §2 está medido.** El banco no mata ningún proceso y
-> no dice nada sobre orden ni sobre no duplicar acciones. Nadie externo ha leído
-> esto todavía.
+> **Ese verde no dice nada sobre §2.** Dice que las reglas de temperatura viven
+> en el código, que cada conclusión nombra la regla que la produjo, y que apagar
+> cualquiera de las trece piezas se nota. El banco **no mata ningún proceso** y
+> **no mide ni el orden ni la no duplicación**. Nadie externo ha leído esto
+> todavía.
+>
+> **El verde llegó tarde y a propósito.** Durante un tramo la corrida terminó en
+> **INVÁLIDO** —ni verde ni rojo— porque una de las condiciones no se podía
+> evaluar con los datos que había. No se relajó la condición: se declaró el dato
+> que faltaba. La historia está en §4b, y es lo más parecido a una prueba de que
+> este instrumento sabe negarse.
 
 En los documentos internos el proyecto figura con el nombre «logística en tiempo
 real con cadena de frío». Aquí no se usa ese nombre: la inmediatez es una decisión
@@ -98,9 +105,9 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
 2. **No afirma que la afirmación de §2 se cumpla, ni en parte.** El banco mide si
    las reglas de temperatura concluyen lo que deben y nombran cuál de ellas lo
    concluyó. **De orden y de no duplicar acciones no mide nada**, y su propia
-   salida lo dice en la última línea. No hay porcentaje, ni verde, ni resultado
-   sobre §2. **Cualquier cifra de cumplimiento de §2 que alguien lea aquí, la
-   habrá puesto él.**
+   salida lo dice en la última línea. **El verde de §4b es el verde del banco de
+   reglas, y de nada más**: no hay porcentaje ni resultado sobre §2. **Cualquier
+   cifra de cumplimiento de §2 que alguien lea aquí, la habrá puesto él.**
 3. **No afirma nada sobre cómo se comportaría ante una caída, una carga o una
    interrupción.** En el banco **no muere ningún proceso**: las muertes de los
    casos X-01…X-07 están modeladas como decidir dos veces lo mismo, que es una
@@ -132,7 +139,7 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
 | Qué | Estado |
 |---|---|
 | Código de producto | **Ninguno.** Lo que hay es el banco de reglas de §4b |
-| Banco de reglas | **Ejecutable.** 64 casos pasan; la corrida termina en **INVÁLIDO** |
+| Banco de reglas | **Ejecutable.** 64 casos pasan; la corrida termina en **VERDE** |
 | Medición de la afirmación de §2 | **Ninguna** |
 | Lectura por alguien externo | **NO MEDIDA** — declarada por escrito, ver `evidencia/tanda-0.md` |
 | Valores del dominio | **Cerrados como valores de trabajo**, sin validación uno a uno |
@@ -145,7 +152,7 @@ describen aquí: describirlos sería contar lo que no hay.
 
 ---
 
-## 4b · El banco de reglas, y por qué su corrida no está en verde
+## 4b · El banco de reglas, y por qué tardó en ponerse verde
 
 ```
 python ejecutar.py
@@ -172,21 +179,34 @@ Hoy la corrida termina así:
 | Al apagar cada pieza, ¿caen todos sus casos? | **13/13** |
 | ¿Dice la mutación **cuál** pieza falta, y no solo que falta una? | **13/13** |
 | ¿Se queda la mutación dentro de su regla? | **13/13** |
-| ¿Hasta dónde puede llegar legítimamente su cascada? | **NO EVALUABLE en las 13** |
+| ¿Hasta dónde puede llegar legítimamente su cascada? | **13/13** |
 | El tipo de producto vive en el lote, no en el envío | **PASA** |
 | Un solo comando, sin dependencias | **PASA** |
-| **Desenlace** | **INVÁLIDO** (código de salida 2) |
+| **Desenlace** | **VERDE** (código de salida 0) |
 
-**INVÁLIDO no es un rojo disfrazado ni un verde con reservas.** El código no está
-mal: la última condición **no se puede evaluar** porque le falta un dato que
-nadie ha escrito todavía. El dominio encadena —apagar el umbral de temperatura
-hace que no haya excursiones, ni acumulado, ni lote perdido, y con él cambian
-cuarenta y tres casos—, así que para juzgar si una cascada llegó demasiado lejos
-hay que saber primero **qué regla alimenta a qué regla**, y eso es una afirmación
-sobre el dominio que este banco no declara. Publicarlo como rojo diría que el
-código falla, y no falla. Publicarlo como verde diría que la condición se
-comprobó, y no se comprobó. **Por eso hay un tercer desenlace, y por eso este
-proyecto sostiene que un instrumento de medición tiene que saber negarse.**
+**La última fila estuvo un tramo en NO EVALUABLE, y el desenlace era INVÁLIDO —
+ni verde ni rojo.** Merece contarse, porque es lo único de este repositorio que
+demuestra algo en vez de afirmarlo.
+
+El dominio encadena: apagar el umbral de temperatura hace que no haya
+excursiones, ni acumulado, ni lote perdido, y con ello cambian cuarenta y tres
+casos. Para juzgar si una cascada llegó **demasiado** lejos hay que saber primero
+**qué regla alimenta a qué regla** — y eso es una afirmación sobre el dominio,
+no algo que se pueda leer del código. Quien lo dedujera del código estaría
+midiendo el código contra sí mismo.
+
+Ese dato no existía. Había dos salidas fáciles y las dos producen un verde falso:
+ensanchar las listas hasta que nada quede fuera —la condición se vuelve
+trivialmente cierta— o deducir la cadena del número de cada regla, que **está
+medido que da dos respuestas equivocadas**. Se tomó la tercera: **publicar
+INVÁLIDO y decir exactamente qué dato faltaba.** Publicarlo como rojo habría
+dicho que el código falla, y no fallaba. Publicarlo como verde habría dicho que
+la condición se comprobó, y no se había comprobado.
+
+Después alguien declaró la relación —doce filas, con la razón de cada una— y la
+corrida se puso verde **sin tocar una línea de código**. Ese es el punto:
+**la condición no se relajó, se alimentó.** Un instrumento de medición tiene que
+saber negarse, y este se negó durante el tiempo que le faltó un dato.
 
 **Y la corrida enseña que las condiciones pueden ponerse rojas**, en vez de
 afirmarlo: cada ejecución las ejerce contra defectos fabricados a propósito
@@ -207,9 +227,9 @@ tocó para no fabricar un verde, está en **`banco/NOTAS-IMPLEMENTACION.md`**.
    de ser honesto.
 3. **`decisiones/decisiones-de-negocio.md`** — los valores del dominio, con valor
    exacto y con la línea de quién decidió cada uno.
-4. **`banco/NOTAS-IMPLEMENTACION.md`** — por qué la corrida termina en INVÁLIDO,
-   qué defecto de modelado se encontró por el camino y qué tres comprobaciones
-   daban rojo sobre código correcto.
+4. **`banco/NOTAS-IMPLEMENTACION.md`** — por qué la corrida estuvo en INVÁLIDO y
+   qué la sacó de ahí, qué defecto de modelado se encontró por el camino y qué
+   tres comprobaciones daban rojo sobre código correcto.
 
 Y una cosa que ejecutar: `python ejecutar.py`. Tarda menos de lo que se tarda en
 leer esta línea y no deja nada instalado.
@@ -231,10 +251,12 @@ ninguna exige instalar nada:
 
 Y una cuarta que sí exige ejecutar, y que es la que más interesa:
 
-4. **¿Te parece que el INVÁLIDO de §4b es honestidad o es una excusa?** Si crees
-   que es una forma elegante de no dar un rojo, dilo. La respuesta está en
-   `banco/NOTAS-IMPLEMENTACION.md` §2, que dice exactamente qué se decidió **no**
-   tocar para no fabricar un verde — y esa decisión se puede atacar.
+4. **¿Te parece que el INVÁLIDO que cuenta §4b fue honestidad o fue una excusa?**
+   Hoy la corrida está verde, así que es fácil contarlo bonito. Si crees que fue
+   una forma elegante de no dar un rojo, dilo. Lo comprobable: la condición se
+   puso verde **sin que se tocara una línea de código**, solo añadiendo un dato
+   — y `banco/NOTAS-IMPLEMENTACION.md` §2 dice exactamente qué se decidió **no**
+   tocar mientras tanto. Esa decisión se puede atacar.
 
 **Las respuestas se transcriben sin corregir** en `evidencia/tanda-0.md`, incluidas
 las que dejen mal al planteamiento. Una respuesta editada no sirve para nada.
