@@ -40,13 +40,18 @@ class Orquesta:
     """
 
     def __init__(self, directorio, semilla=SEMILLA_POR_DEFECTO, corrida=None,
-                 silencioso=False, repeticiones=1, sin_orden=False):
+                 silencioso=False, repeticiones=1, sin_orden=False,
+                 marca_antes=False, receptor_no_idempotente=False):
         self.directorio = Path(directorio)
         self.semilla = semilla
         self.repeticiones = repeticiones
         # Mutante de C1-A: SV-1 arranca sin reconstruir el orden. Solo lo usa la
         # calibracion, para ver a la medicion ponerse roja.
         self.sin_orden = sin_orden
+        # Los dos mutantes de C1-B. Uno pierde acciones, el otro las duplica.
+        # Hacen falta los dos: con uno solo, la calibracion demostraria una mitad.
+        self.marca_antes = marca_antes
+        self.receptor_no_idempotente = receptor_no_idempotente
         self.guion = modulo_guion.generar(semilla, repeticiones)
         self.digesto = modulo_guion.digesto(self.guion)
         self.corrida_id = corrida or ("CO-%s-%d" % (self.guion["etiqueta"], semilla))
@@ -66,7 +71,13 @@ class Orquesta:
         """Los dos ficheros, vacios. Devuelve el conteo de filas de cada uno."""
         self.directorio.mkdir(parents=True, exist_ok=True)
         con1 = almacen.abrir_al1(almacen.ruta_al1(self.directorio))
-        con2 = almacen.abrir_al2(almacen.ruta_al2(self.directorio))
+        # El esquema del receptor tiene que crearse ya mutado si la corrida es
+        # una calibracion. Crearlo normal aqui y dejar que SV-2 lo «mute» despues
+        # no muta nada: `CREATE TABLE IF NOT EXISTS` no toca una tabla que ya
+        # existe, y el mutante se quedaria con la clave primaria de la terna
+        # puesta -- es decir, sin mutar y en silencio--.
+        con2 = almacen.abrir_al2(almacen.ruta_al2(self.directorio),
+                                 idempotente=not self.receptor_no_idempotente)
         try:
             return {"AL-1": almacen.conteos(con1), "AL-2": almacen.conteos(con2)}
         finally:
@@ -82,22 +93,33 @@ class Orquesta:
     def arrancar(self):
         self.puerto_sv2 = protocolo.puerto_libre()
         self.proceso_sv2 = self._lanzar("sistema.sv2", [
-            "--puerto", str(self.puerto_sv2), "--directorio", str(self.directorio)])
+            "--puerto", str(self.puerto_sv2), "--directorio", str(self.directorio)]
+            + (["--receptor-no-idempotente"] if self.receptor_no_idempotente else []))
         if protocolo.esperar_vivo(self.url_sv2) is None:
             raise RuntimeError("SV-2 no respondio a /salud: %s" % self._diagnostico(
                 self.proceso_sv2))
 
+        self.arrancar_sv1()
+        return self
+
+    def arrancar_sv1(self):
+        """Arranca (o vuelve a arrancar) SV-1 sobre el mismo almacen.
+
+        C1-B lo llama despues de cada muerte. El proceso es nuevo; lo que
+        encuentra al abrir es lo que quedo comprometido, y nada mas.
+        """
         self.puerto_sv1 = protocolo.puerto_libre()
         self.proceso_sv1 = self._lanzar("sistema.sv1", [
             "--puerto", str(self.puerto_sv1), "--directorio", str(self.directorio),
             "--semilla", str(self.semilla), "--digesto", self.digesto,
             "--corrida", self.corrida_id, "--sv2", self.url_sv2,
             "--repeticiones", str(self.repeticiones)]
-            + (["--sin-reconstruccion-de-orden"] if self.sin_orden else []))
+            + (["--sin-reconstruccion-de-orden"] if self.sin_orden else [])
+            + (["--marca-antes-de-enviar"] if self.marca_antes else []))
         if protocolo.esperar_vivo(self.url_sv1) is None:
             raise RuntimeError("SV-1 no respondio a /salud: %s" % self._diagnostico(
                 self.proceso_sv1))
-        return self
+        return self.proceso_sv1
 
     def _diagnostico(self, proceso):
         if proceso.poll() is None:

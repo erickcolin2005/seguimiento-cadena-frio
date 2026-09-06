@@ -26,6 +26,7 @@ aqui, moriria con el proceso justo cuando hace falta.
 
 import argparse
 import json
+import os
 import sqlite3
 import sys
 from datetime import datetime, timezone
@@ -44,7 +45,8 @@ def _ahora():
 
 
 class Servicio:
-    def __init__(self, con, guion, corrida_id, url_sv2, reconstruye_orden=True):
+    def __init__(self, con, guion, corrida_id, url_sv2, reconstruye_orden=True,
+                 marca_antes_de_enviar=False):
         self.con = con
         # El mutante de C1-A. Apagarlo hace que SV-1 trate la posicion de LLEGADA
         # como si fuera el instante en que ocurrio -- que es lo que hace un
@@ -52,6 +54,9 @@ class Servicio:
         # existe para que la medicion pueda VERSE fallar. Si con esto apagado
         # C1-A siguiera saliendo verde, C1-A no estaria midiendo nada.
         self.reconstruye_orden = reconstruye_orden
+        # MUTANTE M-1 de C1-B: marcar la entrada como entregada ANTES de
+        # entregarla. Existe para la calibracion, no para operar.
+        self.marca_antes_de_enviar = marca_antes_de_enviar
         self.guion = guion
         self.corrida_id = corrida_id
         self.url_sv2 = url_sv2
@@ -292,16 +297,37 @@ class Servicio:
 
     # --- drenaje -------------------------------------------------------------
 
-    def drenar(self):
+    def drenar(self, una=False, morir=None, terna=None):
         """Entrega al-menos-una-vez. El efecto exactamente uno lo pone SV-2.
 
         Fuera de toda transaccion a proposito: una llamada de red dentro de una
         transaccion la deja esperando a algo que no controla.
+
+        `morir` es la INYECCION DE FALLO de C1-B, y no existe para operar:
+
+          "antes_de_enviar"    el proceso se mata despues de que la intencion
+                               este comprometida y ANTES de que salga a la red.
+          "despues_de_enviar"  se mata despues de que el receptor haya contestado
+                               y ANTES de marcar la entrada como entregada. Es el
+                               peor instante posible: los dos lados discrepan.
+
+        Se usa `os._exit`, que no ejecuta manejadores, ni `atexit`, ni cierra el
+        fichero. Es la misma muerte que VB-1 demostro que el almacen aguanta.
         """
         pendientes = self.con.execute(
             "SELECT * FROM bandeja_salida WHERE corrida_id = ? AND estado = 'PENDIENTE' "
             "ORDER BY commit_pared, lote_id, secuencia_apertura",
             (self.corrida_id,)).fetchall()
+        if terna is not None:
+            # C1-B apunta a un hecho actuable concreto: una muerte por hecho, y
+            # despues se le deja terminar. Sin esto, la tanda mataria en cada
+            # intento y ninguna entrada llegaria nunca a marcarse entregada.
+            objetivo = tuple(terna)
+            pendientes = [f for f in pendientes
+                          if (f["lote_id"], f["secuencia_apertura"],
+                              f["clase"]) == objetivo]
+        if una:
+            pendientes = pendientes[:1]
         entregadas, rechazadas, fallidas = 0, [], []
         for fila in pendientes:
             cuerpo = {
@@ -320,6 +346,14 @@ class Servicio:
                 "corrida_id = ? AND lote_id = ? AND secuencia_apertura = ? AND clase = ?",
                 (fila["corrida_id"], fila["lote_id"], fila["secuencia_apertura"],
                  fila["clase"]))
+            if self.marca_antes_de_enviar:
+                # MUTANTE M-1: marcar hecho antes de hacerlo. Si el proceso muere
+                # aqui, la entrada queda ENTREGADA sin que nadie la haya recibido
+                # y nadie vuelve a intentarlo: el hecho actuable se pierde.
+                self._marcar_entregada(fila)
+            if morir == "antes_de_enviar":
+                sys.stdout.flush()
+                os._exit(9)
             try:
                 codigo, respuesta = protocolo.pedir(self.url_sv2, "/acciones", cuerpo)
             except Exception as error:              # noqa: BLE001
@@ -327,14 +361,15 @@ class Servicio:
                                            fila["secuencia_apertura"], fila["clase"]],
                                  "motivo": type(error).__name__})
                 continue
+            if morir == "despues_de_enviar":
+                # El receptor ya contesto. La entrada sigue PENDIENTE. Los dos
+                # lados discrepan, y eso es exactamente la ventana.
+                sys.stdout.flush()
+                os._exit(9)
             desenlace = respuesta.get("desenlace")
             if desenlace in ("registrada", "ya_registrada"):
-                self.con.execute(
-                    "UPDATE bandeja_salida SET estado = 'ENTREGADA', entrega_pared = ? "
-                    "WHERE corrida_id = ? AND lote_id = ? AND secuencia_apertura = ? "
-                    "AND clase = ?",
-                    (_ahora(), fila["corrida_id"], fila["lote_id"],
-                     fila["secuencia_apertura"], fila["clase"]))
+                if not self.marca_antes_de_enviar:
+                    self._marcar_entregada(fila)
                 entregadas += 1
             else:
                 # Un rechazo de dominio NO se reintenta: reintentarlo seria
@@ -361,6 +396,14 @@ class Servicio:
                      "lotes": {f["lote_id"]: dict(f) for f in filas},
                      "total": len(filas)}
 
+    def _marcar_entregada(self, fila):
+        self.con.execute(
+            "UPDATE bandeja_salida SET estado = 'ENTREGADA', entrega_pared = ? "
+            "WHERE corrida_id = ? AND lote_id = ? AND secuencia_apertura = ? "
+            "AND clase = ?",
+            (_ahora(), fila["corrida_id"], fila["lote_id"],
+             fila["secuencia_apertura"], fila["clase"]))
+
     def bandeja(self):
         filas = self.con.execute(
             "SELECT lote_id, secuencia_apertura, clase, estado, intentos "
@@ -386,7 +429,10 @@ class Servicio:
         if metodo == "POST" and camino == "/lecturas":
             return self.recibir_lectura(cuerpo)
         if metodo == "POST" and camino == "/drenar":
-            return self.drenar()
+            cuerpo = cuerpo or {}
+            return self.drenar(una=bool(cuerpo.get("una")),
+                               morir=cuerpo.get("morir"),
+                               terna=cuerpo.get("terna"))
         return 404, {"desenlace": "ruta_desconocida", "ruta": camino}
 
 
@@ -399,6 +445,9 @@ def main(argv=None):
     partes.add_argument("--corrida", required=True)
     partes.add_argument("--sv2", required=True, help="URL base de SV-2")
     partes.add_argument("--repeticiones", type=int, default=1)
+    partes.add_argument("--marca-antes-de-enviar", action="store_true",
+                        help="MUTANTE: marca la entrada entregada antes de "
+                             "entregarla. Para la calibracion de C1-B.")
     partes.add_argument("--sin-reconstruccion-de-orden", action="store_true",
                         help="MUTANTE: trata el orden de llegada como el real. "
                              "Existe para que C1-A pueda verse fallar.")
@@ -413,7 +462,10 @@ def main(argv=None):
 
     con = almacen.abrir_al1(almacen.ruta_al1(args.directorio))
     servicio = Servicio(con, g, args.corrida, args.sv2,
-                        reconstruye_orden=not args.sin_reconstruccion_de_orden)
+                        reconstruye_orden=not args.sin_reconstruccion_de_orden,
+                        marca_antes_de_enviar=args.marca_antes_de_enviar)
+    if args.marca_antes_de_enviar:
+        print("SV-1 ARRANCA MUTADO: marca antes de enviar", flush=True)
     if args.sin_reconstruccion_de_orden:
         print("SV-1 ARRANCA MUTADO: sin reconstruccion de orden", flush=True)
     servidor = protocolo.crear_servidor(args.puerto, servicio.manejar)

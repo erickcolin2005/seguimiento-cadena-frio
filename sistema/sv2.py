@@ -219,9 +219,15 @@ def main(argv=None):
     partes = argparse.ArgumentParser(description="SV-2 · el testigo")
     partes.add_argument("--puerto", type=int, required=True)
     partes.add_argument("--directorio", required=True)
+    partes.add_argument("--receptor-no-idempotente", action="store_true",
+                        help="MUTANTE: la terna deja de ser clave. Existe para la "
+                             "calibracion de C1-B, no para operar.")
     args = partes.parse_args(argv)
 
-    con = almacen.abrir_al2(almacen.ruta_al2(args.directorio))
+    con = almacen.abrir_al2(almacen.ruta_al2(args.directorio),
+                            idempotente=not args.receptor_no_idempotente)
+    if args.receptor_no_idempotente:
+        print("SV-2 ARRANCA MUTADO: receptor no idempotente", flush=True)
     servicio = Servicio(con)
     servidor = protocolo.crear_servidor(args.puerto, servicio.manejar)
     print("SV-2 escuchando en %s" % protocolo.base(args.puerto), flush=True)

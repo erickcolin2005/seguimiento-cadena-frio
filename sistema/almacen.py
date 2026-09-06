@@ -246,9 +246,26 @@ def abrir_al1(ruta):
     return _abrir(ruta, ESQUEMA_AL1)
 
 
-def abrir_al2(ruta):
+# --- El mutante del receptor, y por que existe -------------------------------
+# La clave primaria de `accion` ES la terna: es lo unico que hace que dos
+# entregas del mismo hecho sean una accion. El mutante la sustituye por una
+# clave artificial, asi que el receptor deja de deduplicar y una reentrega
+# produce DOS filas. No es una opcion de operacion: existe para que C1-B pueda
+# demostrar por refutacion que la tanda de muertes entro en la ventana. Si con
+# el receptor mutado no aparecieran anomalias, la tanda habria matado antes o
+# despues, y la medicion sobre el sistema correcto no valdria (MI-3).
+ESQUEMA_AL2_MUTANTE = ESQUEMA_AL2.replace(
+    """    instante_registro_pared  TEXT NOT NULL,
+    PRIMARY KEY (corrida_id, lote_id, secuencia_apertura, clase)
+);""",
+    """    instante_registro_pared  TEXT NOT NULL,
+    id_artificial            INTEGER PRIMARY KEY AUTOINCREMENT
+);""")
+
+
+def abrir_al2(ruta, idempotente=True):
     """Abre el almacen de SV-2. Solo lo llama SV-2."""
-    return _abrir(ruta, ESQUEMA_AL2)
+    return _abrir(ruta, ESQUEMA_AL2 if idempotente else ESQUEMA_AL2_MUTANTE)
 
 
 def ruta_al1(directorio):
