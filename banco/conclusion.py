@@ -82,6 +82,13 @@ class ConclusionLote:
     t_d: object | None
     aptitud: str | None             # apto | no_apto | no_declarable_apto
     regla_aptitud: str | None
+    # RC-08 en dos, porque el almacen lo exige en dos columnas: un unico
+    # `no_apto` haria indistinguible apagar el umbral de apagar la
+    # irreversibilidad (banco §8 aviso 1, modelo-datos). NO entran en `campos()`:
+    # son derivables de `aptitud` y `acumulado`, que ya estan ahi, asi que
+    # meterlos en el digesto no anadiria informacion y si moveria la mutacion.
+    umbral_superado: bool
+    irreversible_activa: bool
     acumulado: int | None           # minutos
     regla_acumulado: str | None
     clase_accion: str | None        # NINGUNA | RESCATE | DISPOSICION

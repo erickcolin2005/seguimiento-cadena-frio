@@ -4,11 +4,13 @@
 > **banco de reglas de cadena de frío que se ejecuta** — 64 casos, trece piezas
 > apagables— y hoy su corrida termina en **VERDE**.
 >
-> **Ese verde no dice nada sobre §2.** Dice que las reglas de temperatura viven
-> en el código, que cada conclusión nombra la regla que la produjo, y que apagar
-> cualquiera de las trece piezas se nota. El banco **no mata ningún proceso** y
-> **no mide ni el orden ni la no duplicación**. Nadie externo ha leído esto
-> todavía.
+> Y hay **dos servicios separados que hablan**, cada uno con su almacén, cuyas
+> siete comprobaciones también pasan (§4c).
+>
+> **Ninguno de los dos verdes dice nada sobre §2.** Dicen que las reglas viven en
+> el código y nombran cuál concluyó qué, y que el recuento vive fuera del proceso
+> que muere. **Nadie ha matado todavía un proceso entre decidir y registrar**,
+> que es el único sitio donde §2 se juega algo. Nadie externo ha leído esto.
 >
 > **El verde llegó tarde y a propósito.** Durante un tramo la corrida terminó en
 > **INVÁLIDO** —ni verde ni rojo— porque una de las condiciones no se podía
@@ -98,20 +100,24 @@ número de medición en un repositorio sin medición se lee como un resultado.**
 
 Esta es la sección más importante del documento. Cada punto es comprobable.
 
-1. **No afirma que exista un producto.** Lo que hay es el banco de reglas de §4b,
-   que se ejecuta y no sirve a nadie: no hay ingesta, ni almacenamiento, ni
-   interfaz, ni nada que un transportista pueda usar. Comprobación: listar el
-   contenido del repositorio y correr el único comando que hay.
+1. **No afirma que exista un producto.** Hay dos servicios que hablan, cada uno
+   con su almacén, y un banco de reglas que se ejecuta. **No hay nada que un
+   transportista pueda usar**: ninguna interfaz, ninguna sonda real, ningún
+   envío que no salga de un guion sintético. Comprobación: listar el repositorio
+   y correr los comandos de §4b y §4c.
 2. **No afirma que la afirmación de §2 se cumpla, ni en parte.** El banco mide si
    las reglas de temperatura concluyen lo que deben y nombran cuál de ellas lo
    concluyó. **De orden y de no duplicar acciones no mide nada**, y su propia
    salida lo dice en la última línea. **El verde de §4b es el verde del banco de
    reglas, y de nada más**: no hay porcentaje ni resultado sobre §2. **Cualquier
    cifra de cumplimiento de §2 que alguien lea aquí, la habrá puesto él.**
-3. **No afirma nada sobre cómo se comportaría ante una caída, una carga o una
-   interrupción.** En el banco **no muere ningún proceso**: las muertes de los
-   casos X-01…X-07 están modeladas como decidir dos veces lo mismo, que es una
-   regla del dominio y no una caída real.
+3. **No afirma nada sobre cómo se comportaría ante una caída en el peor
+   instante, ante carga, ni ante una interrupción.** En el banco **no muere
+   ningún proceso**: las muertes de X-01…X-07 están modeladas como decidir dos
+   veces lo mismo, que es una regla del dominio y no una caída real. En el
+   sistema **sí se mata un proceso**, pero **después de drenar y en un punto
+   tranquilo**, y solo para enseñar que el recuento vive fuera de él. Matarlo
+   entre decidir y registrar, que es donde duele, **no se ha hecho**.
 4. **No afirma que los valores del dominio estén validados.** Cuánto dura una
    desviación antes de contar, cuánto se tolera antes de perder el lote y cuánto
    tiempo se conserva el registro son **valores de trabajo adoptados, no
@@ -138,8 +144,9 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
 
 | Qué | Estado |
 |---|---|
-| Código de producto | **Ninguno.** Lo que hay es el banco de reglas de §4b |
+| Código de producto | **Ninguno.** Nada que un transportista pueda usar |
 | Banco de reglas | **Ejecutable.** 64 casos pasan; la corrida termina en **VERDE** |
+| Dos servicios con fronteras reales | **En pie.** Las siete comprobaciones de §4c pasan; **VERDE** |
 | Medición de la afirmación de §2 | **Ninguna** |
 | Lectura por alguien externo | **NO MEDIDA** — declarada por escrito, ver `evidencia/tanda-0.md` |
 | Valores del dominio | **Cerrados como valores de trabajo**, sin validación uno a uno |
@@ -219,6 +226,50 @@ tocó para no fabricar un verde, está en **`banco/NOTAS-IMPLEMENTACION.md`**.
 
 ---
 
+## 4c · Dos servicios que hablan, y el que cuenta no es el que muere
+
+```
+python levantar.py     los dos servicios en pie, con los almacenes vacíos
+python comprobar.py    las siete comprobaciones de este tramo
+```
+
+**Cuatro procesos y dos ficheros. Ni un demonio, ni una cuenta, ni un secreto,
+ni una imagen.** Todo es biblioteca estándar, y el arranque de un comando **no
+depende de Docker**: si algún día hay contenedores, serán una segunda forma de
+levantar lo mismo, no la primera.
+
+Lo que hay dentro son dos servicios de verdad separados. **SV-1** aplica las
+reglas —las mismas de §4b, importadas, no reescritas— y **SV-2** guarda el libro
+de acciones. Cada uno tiene su propio almacén, y la separación es comprobable:
+ninguna tabla aparece en los dos, ninguna clave foránea cruza, y ninguno de los
+dos tiene siquiera camino en el código para abrir el fichero del otro.
+
+Hoy las siete comprobaciones pasan y el desenlace es **VERDE**. Dos merecen
+contarse:
+
+**El camino entero, y por qué el número no se descuadra.** Cien lecturas entran,
+SV-1 las persiste antes de mirarlas, evalúa, y acaba proponiendo actuar **muchas
+veces sobre los mismos cuatro hechos** — porque reevalúa en cada lectura. En el
+libro acaban **cuatro acciones, no muchas**. Quien deduplicó no fue la memoria
+del proceso, que se muere con él: fue **la clave del hecho mismo** — qué lote,
+qué excursión, qué clase de acción.
+
+**El que cuenta no es el que muere.** Se mata a SV-1, se comprueba que su puerto
+ya no acepta conexiones, y se le pregunta el recuento a SV-2: sigue contestando
+el mismo número. Y lo cuenta contando filas, no leyendo una columna que dice
+cuántas hay — una columna así se puede desincronizar de lo que dice contar.
+
+**Lo que este verde no dice, y es la mitad del asunto.** Aquí a SV-1 se le mata
+**después** de haber entregado todo y en un punto tranquilo. Matarlo **entre
+decidir y registrar**, que es el único sitio donde la afirmación de §2 se juega
+algo, no se ha hecho. Este tramo enseña que el testigo existe y sobrevive; **no
+mide nada de §2**.
+
+El resto —incluidas cuatro cosas declaradas en vez de dadas por cubiertas— está
+en **`NOTAS-PL2.md`**.
+
+---
+
 ## 5 · Qué leer, y en qué orden
 
 1. **Este README** — el problema y la afirmación.
@@ -231,8 +282,11 @@ tocó para no fabricar un verde, está en **`banco/NOTAS-IMPLEMENTACION.md`**.
    qué la sacó de ahí, qué defecto de modelado se encontró por el camino y qué
    tres comprobaciones daban rojo sobre código correcto.
 
-Y una cosa que ejecutar: `python ejecutar.py`. Tarda menos de lo que se tarda en
-leer esta línea y no deja nada instalado.
+5. **`NOTAS-PL2.md`** — qué mide cada una de las siete comprobaciones de los dos
+   servicios, y las cuatro cosas que se declaran en vez de darse por cubiertas.
+
+Y dos cosas que ejecutar: `python ejecutar.py` y `python comprobar.py`. Ninguna
+de las dos deja nada instalado.
 
 ---
 

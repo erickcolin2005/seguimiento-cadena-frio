@@ -257,6 +257,11 @@ def evaluar_lote(envio, lote, t_d, sw, registro):
 
     # --- RC-08 · perdida del lote, en dos mitades -----------------------------
     aptitud, regla_aptitud = "apto", "RC-08"
+    # Las dos mitades por separado, para que el almacen pueda escribirlas en dos
+    # columnas. No cambian ningun desenlace: son lectura de lo que ya se decidio.
+    umbral_superado = (sw.encendida("RC-08-umbral")
+                       and acumulado > parametros.duracion_tolerada)
+    irreversible_activa = umbral_superado and sw.encendida("RC-08-irreversibilidad")
     if sw.encendida("RC-08-umbral"):
         if acumulado > parametros.duracion_tolerada:
             aptitud = "no_apto"
@@ -308,6 +313,7 @@ def evaluar_lote(envio, lote, t_d, sw, registro):
     return ConclusionLote(
         lote.lote_id, lote.tipo_producto, t_d,
         aptitud, regla_aptitud,
+        umbral_superado, irreversible_activa,
         acumulado, regla_acumulado,
         clase_accion, regla_clase_accion,
         marca_secuencia, regla_marca_secuencia,
