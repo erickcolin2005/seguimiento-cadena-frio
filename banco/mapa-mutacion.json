@@ -1,0 +1,30 @@
+{
+  "fuente": "banco-reglas-cadena-frio.md rev. 1 · §8 · transcrito como dato, no reinterpretado",
+  "nota": "Trece piezas, no doce: RC-08 se cuenta como dos. La lista de la mitad de la irreversibilidad es A-09 y solo A-09, y su condicion (a) y su condicion (b) son el mismo caso.",
+  "listas_son": "LIMITE INFERIOR. §8 dice 'casos que DEBEN caer'. La condicion (a) las usa asi. NINGUNA condicion las usa como limite superior: hacerlo era leer la misma lista en las dos direcciones a la vez, y es lo que la reapertura de cinturon-calidad.md §4.4 corrigio.",
+  "cascada_declarada": null,
+  "por_que_null": "La condicion (c2) -hasta donde puede llegar legitimamente la cascada de una regla- necesita la relacion regla->reglas que alimenta, declarada por el banco. El banco NO la declara: §3 fija un orden de EVALUACION y §3 y §7 dicen ambos, con estas palabras, que ese orden numerico no resuelve la precedencia entre una regla que acumula y otra que decide. Medido: usar el orden numerico como sustituto marca falsa contaminacion en RC-06 (7 casos, via RC-05) y en RC-12 (1 caso, via RC-07/RC-09/RC-10), que son cascada legitima. Mientras esta clave sea null la condicion (c2) se publica NO EVALUABLE y la corrida no puede salir VERDE. El dia que analyst-agent la declare, se escribe aqui como {regla: [reglas aguas abajo]} -doce entradas de reglas, nunca listas de casos- y (c2) se evalua sin tocar una linea de codigo.",
+  "piezas": {
+    "RC-01": {"casos": ["R-01", "R-02"], "discriminante": "R-02"},
+    "RC-02": {"casos": ["L-01", "R-03", "R-04", "A-02", "O-04", "O-05", "A-18"],
+              "discriminante": "R-04"},
+    "RC-03": {"casos": ["R-05", "R-06", "L-02", "H-04"], "discriminante": "R-06"},
+    "RC-04": {"casos": ["A-19", "L-05", "L-07", "L-09"], "discriminante": "A-19"},
+    "RC-05": {"casos": ["A-04", "L-10", "L-11", "L-12", "O-06"],
+              "discriminante": "L-11"},
+    "RC-06": {"casos": ["A-05", "L-13", "L-14", "O-02"], "discriminante": "L-13"},
+    "RC-07": {"casos": ["A-06", "A-07", "L-15", "L-16", "O-02"],
+              "discriminante": "A-07"},
+    "RC-08-umbral": {"casos": ["A-08", "A-10", "L-16", "L-17", "A-07", "O-01"],
+                     "discriminante": "A-10"},
+    "RC-08-irreversibilidad": {"casos": ["A-09"], "discriminante": "A-09"},
+    "RC-09": {"casos": ["A-11", "A-12", "A-13", "A-14", "A-15", "L-18", "L-19",
+                        "O-03", "X-07"],
+              "discriminante": "A-12"},
+    "RC-10": {"casos": ["A-16", "A-17", "X-01", "X-02", "X-03"],
+              "discriminante": "A-16"},
+    "RC-11": {"casos": ["H-01", "H-02", "H-03", "L-20", "H-04"],
+              "discriminante": "H-02"},
+    "RC-12": {"casos": ["A-18", "L-14"], "discriminante": "A-18"}
+  }
+}

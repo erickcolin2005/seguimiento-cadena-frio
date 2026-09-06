@@ -1,0 +1,125 @@
+{
+  "fuente": "banco-reglas-cadena-frio.md rev. 1 · §6 · casos de muerte X-01…X-07 (X-03 va en su propio fichero)",
+  "nota": "AVISO DE ALCANCE. Aqui no muere ningun proceso: en este tramo no hay proceso que matar. Una muerte se modela como una REDECISION del mismo hecho actuable, que es lo que hace un sistema al revivir. Lo que estos casos ejercen es la regla de dominio RC-10 -el hecho actuable identifica la accion-, NO la garantia de 'exactamente una vez' frente a una caida. Esa garantia no esta medida y este banco no la afirma. Se comprueba CUANTAS acciones, nunca CUAL.",
+  "casos": [
+    {
+      "caso_id": "X-01",
+      "titulo": "Un hecho actuable de RESCATE y una redecision: exactamente una accion",
+      "reglas": ["RC-10"],
+      "envio": {
+        "envio_id": "EN-10",
+        "lotes": [{"lote_id": "LT-60", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 30, "valor": 9.0}
+        ]
+      },
+      "decision": 22,
+      "redecisiones": 1,
+      "esperado": {
+        "lotes": [{"lote": "LT-60", "clase_accion": "RESCATE",
+                   "regla_clase_accion": "RC-09"}],
+        "acciones": {"total": 1, "por_lote": {"LT-60": 1}}
+      }
+    },
+    {
+      "caso_id": "X-02",
+      "titulo": "El mismo hecho con cinco redecisiones sucesivas: exactamente una accion",
+      "reglas": ["RC-10"],
+      "envio": {
+        "envio_id": "EN-10",
+        "lotes": [{"lote_id": "LT-61", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 30, "valor": 9.0}
+        ]
+      },
+      "decision": 22,
+      "redecisiones": 5,
+      "esperado": {
+        "acciones": {"total": 1, "por_lote": {"LT-61": 1}}
+      }
+    },
+    {
+      "caso_id": "X-04",
+      "titulo": "Atraso de mas de doscientas lecturas sin procesar: cada hecho actuable, actuado una sola vez",
+      "reglas": ["RC-09", "RC-10"],
+      "envio": {
+        "envio_id": "EN-10",
+        "lotes": [{"lote_id": "LT-62", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 170, "valor": 4.0},
+          {"desde": 171, "hasta": 201, "valor": 9.0},
+          {"desde": 202, "hasta": 205, "valor": 4.0}
+        ]
+      },
+      "redecisiones": 1,
+      "esperado": {
+        "lotes": [{"lote": "LT-62", "acumulado": 31, "aptitud": "no_apto",
+                   "clase_accion": "DISPOSICION"}],
+        "acciones": {"total": 1, "por_lote": {"LT-62": 1}}
+      }
+    },
+    {
+      "caso_id": "X-05",
+      "titulo": "CONTROL. La redecision cae antes de que el hecho sea actuable: una accion, decidida por primera vez al revivir. No cuenta como muerte en ventana",
+      "control": true,
+      "reglas": [],
+      "envio": {
+        "envio_id": "EN-10",
+        "lotes": [{"lote_id": "LT-63", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 30, "valor": 9.0}
+        ]
+      },
+      "decision": [12, 22],
+      "esperado": {
+        "lotes": [
+          {"lote": "LT-63", "evaluacion": 0, "clase_accion": "NINGUNA",
+           "marca_excursiones": "sin_excursion"},
+          {"lote": "LT-63", "evaluacion": 1, "clase_accion": "RESCATE"}
+        ],
+        "acciones": {"total": 1, "por_lote": {"LT-63": 1}}
+      }
+    },
+    {
+      "caso_id": "X-06",
+      "titulo": "CONTROL. La redecision cae despues de registrar: una accion. No cuenta como muerte en ventana",
+      "control": true,
+      "reglas": [],
+      "envio": {
+        "envio_id": "EN-10",
+        "lotes": [{"lote_id": "LT-64", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 30, "valor": 9.0}
+        ]
+      },
+      "decision": [22, 23],
+      "esperado": {
+        "acciones": {"total": 1, "por_lote": {"LT-64": 1}}
+      }
+    },
+    {
+      "caso_id": "X-07",
+      "titulo": "La redecision cae sobre una excursion NO actuable: cero acciones. Actuar aqui es fallo del mismo rango que duplicar",
+      "reglas": ["RC-09"],
+      "envio": {
+        "envio_id": "EN-10",
+        "lotes": [{"lote_id": "LT-65", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 21, "valor": 9.0},
+          {"desde": 22, "hasta": 30, "valor": 4.0}
+        ]
+      },
+      "redecisiones": 1,
+      "esperado": {
+        "lotes": [{"lote": "LT-65", "clase_accion": "NINGUNA",
+                   "regla_clase_accion": "RC-09", "acumulado": 12}],
+        "acciones": {"total": 0}
+      }
+    }
+  ]
+}

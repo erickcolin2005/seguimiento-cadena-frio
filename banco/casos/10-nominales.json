@@ -1,0 +1,392 @@
+{
+  "fuente": "banco-reglas-cadena-frio.md rev. 1 · §4 · casos nominales A-01…A-19",
+  "casos": [
+    {
+      "caso_id": "A-01",
+      "titulo": "Lectura admitida y situada dentro del rango de su tipo",
+      "reglas": ["RC-01", "RC-04"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-01", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": 4.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-01", "indice": 0, "atribucion": "evaluada",
+                      "regla_atribucion": "RC-01", "situacion": "dentro_de_rango",
+                      "regla_situacion": "RC-04"}],
+        "lotes": [{"lote": "LT-01", "aptitud": "apto", "regla_aptitud": "RC-08",
+                   "marca_excursiones": "sin_excursion",
+                   "regla_marca_excursiones": "RC-05"}],
+        "sin_excursiones": ["LT-01"]
+      }
+    },
+    {
+      "caso_id": "A-02",
+      "titulo": "Envio multilote: la lectura afecta al lote a bordo y no al que aun no lo esta",
+      "reglas": ["RC-02", "RC-04"],
+      "envio": {
+        "envio_id": "EN-07",
+        "lotes": [
+          {"lote_id": "LT-20", "tipo": "P-REF", "carga": 0},
+          {"lote_id": "LT-21", "tipo": "P-REF", "carga": 20}
+        ],
+        "lecturas": [{"produccion": 10, "valor": 9.0}]
+      },
+      "esperado": {
+        "lecturas": [
+          {"lote": "LT-20", "indice": 0, "imputacion": "imputada",
+           "regla_imputacion": "RC-02", "situacion": "fuera_de_rango",
+           "regla_situacion": "RC-04"},
+          {"lote": "LT-21", "indice": 0, "imputacion": "no_imputada",
+           "regla_imputacion": "RC-02", "situacion": null, "validez": null}
+        ]
+      }
+    },
+    {
+      "caso_id": "A-03",
+      "titulo": "P-REF a 4,0 grados: dentro de rango",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-01", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": 4.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-01", "indice": 0, "situacion": "dentro_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "A-04",
+      "titulo": "Siete lecturas fuera de rango seguidas: excursion abierta en T0+10",
+      "reglas": ["RC-05"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-03", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 16, "valor": 9.0}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-03", "apertura": 10, "cierre": null,
+                         "abierta": true, "duracion": 6, "transitoria": false,
+                         "regla_apertura": "RC-05"}],
+        "lotes": [{"lote": "LT-03", "marca_excursiones": "con_excursion",
+                   "clase_accion": "RESCATE", "regla_clase_accion": "RC-09"}]
+      }
+    },
+    {
+      "caso_id": "A-05",
+      "titulo": "Excursion cerrada por la primera lectura dentro de rango: 12 minutos",
+      "reglas": ["RC-06"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-04", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 21, "valor": 9.0},
+          {"produccion": 22, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-04", "apertura": 10, "cierre": 22,
+                         "duracion": 12, "abierta": false,
+                         "regla_apertura": "RC-05", "regla_cierre": "RC-06"}],
+        "lotes": [{"lote": "LT-04", "acumulado": 12, "regla_acumulado": "RC-07",
+                   "aptitud": "apto", "marca_secuencia": "completa"}]
+      }
+    },
+    {
+      "caso_id": "A-06",
+      "titulo": "Dos excursiones de 12 y 10 minutos: acumulado 22, lote apto",
+      "reglas": ["RC-07"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-05", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 21, "valor": 9.0},
+          {"desde": 22, "hasta": 23, "valor": 4.0},
+          {"desde": 24, "hasta": 33, "valor": 9.0},
+          {"produccion": 34, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-05", "acumulado": 22, "regla_acumulado": "RC-07",
+                   "aptitud": "apto", "regla_aptitud": "RC-08",
+                   "clase_accion": "NINGUNA"}],
+        "acciones": {"total": 0}
+      }
+    },
+    {
+      "caso_id": "A-07",
+      "titulo": "Dos excursiones de 18 minutos: ninguna sola supera, el acumulado si",
+      "reglas": ["RC-07", "RC-08"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-06", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 27, "valor": 9.0},
+          {"produccion": 28, "valor": 4.0},
+          {"desde": 29, "hasta": 46, "valor": 9.0},
+          {"produccion": 47, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-06", "acumulado": 36, "regla_acumulado": "RC-07",
+                   "aptitud": "no_apto", "regla_aptitud": "RC-08",
+                   "clase_accion": "DISPOSICION"}]
+      }
+    },
+    {
+      "caso_id": "A-08",
+      "titulo": "P-CON con acumulado de 11 minutos sobre 10 tolerados: no apto",
+      "reglas": ["RC-08"],
+      "envio": {
+        "envio_id": "EN-02",
+        "lotes": [{"lote_id": "LT-07", "tipo": "P-CON", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": -20.0},
+          {"desde": 10, "hasta": 20, "valor": -10.0},
+          {"produccion": 21, "valor": -20.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-07", "acumulado": 11, "aptitud": "no_apto",
+                   "regla_aptitud": "RC-08",
+                   "marca_secuencia": "hueco_no_determinante"}]
+      }
+    },
+    {
+      "caso_id": "A-09",
+      "titulo": "Lote ya no apto y veinte lecturas dentro de rango despues: sigue no apto",
+      "reglas": ["RC-08"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-08", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 40, "valor": 9.0},
+          {"desde": 41, "hasta": 60, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-08", "acumulado": 31, "aptitud": "no_apto",
+                   "regla_aptitud": "RC-08", "clase_accion": "DISPOSICION"}]
+      }
+    },
+    {
+      "caso_id": "A-10",
+      "titulo": "P-FRE con acumulado de 61 minutos sobre 60 tolerados: no apto",
+      "reglas": ["RC-08"],
+      "envio": {
+        "envio_id": "EN-03",
+        "lotes": [{"lote_id": "LT-09", "tipo": "P-FRE", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 15.0},
+          {"desde": 10, "hasta": 70, "valor": 20.0},
+          {"produccion": 71, "valor": 15.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-09", "acumulado": 61, "aptitud": "no_apto",
+                   "regla_aptitud": "RC-08"}]
+      }
+    },
+    {
+      "caso_id": "A-11",
+      "titulo": "Excursion abierta con 12 minutos conocidos en T_d: RESCATE",
+      "reglas": ["RC-09"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-10", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 30, "valor": 9.0}
+        ]
+      },
+      "decision": 22,
+      "esperado": {
+        "lotes": [{"lote": "LT-10", "acumulado": 12, "clase_accion": "RESCATE",
+                   "regla_clase_accion": "RC-09", "aptitud": "apto"}],
+        "acciones": {"total": 1, "clases": ["RESCATE"]}
+      }
+    },
+    {
+      "caso_id": "A-12",
+      "titulo": "Excursion cerrada con 12 minutos: NINGUNA, y el hecho no es actuable",
+      "reglas": ["RC-09"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-11", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 21, "valor": 9.0},
+          {"desde": 22, "hasta": 30, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-11", "acumulado": 12, "clase_accion": "NINGUNA",
+                   "regla_clase_accion": "RC-09", "aptitud": "apto"}],
+        "acciones": {"total": 0}
+      }
+    },
+    {
+      "caso_id": "A-13",
+      "titulo": "Acumulado de 31 minutos en T_d: DISPOSICION",
+      "reglas": ["RC-09"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-12", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 40, "valor": 9.0},
+          {"produccion": 41, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-12", "acumulado": 31, "clase_accion": "DISPOSICION",
+                   "regla_clase_accion": "RC-09", "aptitud": "no_apto"}],
+        "acciones": {"total": 1, "clases": ["DISPOSICION"]}
+      }
+    },
+    {
+      "caso_id": "A-14",
+      "titulo": "La misma secuencia con dos instantes de decision: RESCATE y DISPOSICION, las dos correctas",
+      "reglas": ["RC-09"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-13", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 49, "valor": 9.0},
+          {"desde": 50, "hasta": 52, "valor": 4.0}
+        ]
+      },
+      "decision": [15, 90],
+      "esperado": {
+        "lotes": [
+          {"lote": "LT-13", "evaluacion": 0, "acumulado": 5,
+           "clase_accion": "RESCATE", "regla_clase_accion": "RC-09"},
+          {"lote": "LT-13", "evaluacion": 1, "acumulado": 40,
+           "clase_accion": "DISPOSICION", "regla_clase_accion": "RC-09",
+           "aptitud": "no_apto"}
+        ],
+        "acciones": {"total": 2, "clases": ["RESCATE", "DISPOSICION"]}
+      }
+    },
+    {
+      "caso_id": "A-15",
+      "titulo": "RESCATE en T_d1 y DISPOSICION en T_d2: dos hechos actuables, no un duplicado",
+      "reglas": ["RC-09", "RC-10"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-14", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 45, "valor": 9.0},
+          {"produccion": 46, "valor": 4.0}
+        ]
+      },
+      "decision": [22, 41],
+      "esperado": {
+        "lotes": [
+          {"lote": "LT-14", "evaluacion": 0, "acumulado": 12,
+           "clase_accion": "RESCATE"},
+          {"lote": "LT-14", "evaluacion": 1, "acumulado": 31,
+           "clase_accion": "DISPOSICION"}
+        ],
+        "acciones": {"total": 2, "por_lote": {"LT-14": 2}}
+      }
+    },
+    {
+      "caso_id": "A-16",
+      "titulo": "El mismo hecho actuable decidido dos veces: una sola accion",
+      "reglas": ["RC-10"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-15", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 40, "valor": 9.0}
+        ]
+      },
+      "decision": [30, 31],
+      "esperado": {
+        "lotes": [
+          {"lote": "LT-15", "evaluacion": 0, "clase_accion": "RESCATE"},
+          {"lote": "LT-15", "evaluacion": 1, "clase_accion": "RESCATE"}
+        ],
+        "acciones": {"total": 1, "por_lote": {"LT-15": 1}}
+      }
+    },
+    {
+      "caso_id": "A-17",
+      "titulo": "Dos hechos actuables distintos del mismo lote: dos acciones",
+      "reglas": ["RC-10"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-16", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 45, "valor": 9.0},
+          {"produccion": 46, "valor": 4.0}
+        ]
+      },
+      "decision": [22, 41],
+      "esperado": {
+        "acciones": {"total": 2, "por_lote": {"LT-16": 2},
+                     "clases": ["RESCATE", "DISPOSICION"]}
+      }
+    },
+    {
+      "caso_id": "A-18",
+      "titulo": "Envio multilote: LT-20 concluye en su entrega y lo posterior no le afecta",
+      "reglas": ["RC-12", "RC-02"],
+      "envio": {
+        "envio_id": "EN-07",
+        "lotes": [
+          {"lote_id": "LT-20", "tipo": "P-REF", "carga": 0, "entrega": 40},
+          {"lote_id": "LT-21", "tipo": "P-REF", "carga": 0, "entrega": 90}
+        ],
+        "lecturas": [
+          {"desde": 0, "hasta": 49, "valor": 4.0},
+          {"desde": 50, "hasta": 70, "valor": 9.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [
+          {"lote": "LT-20", "cerrada_en": 40, "regla_cierre_conclusion": "RC-12",
+           "aptitud": "apto", "acumulado": 0,
+           "marca_excursiones": "sin_excursion"},
+          {"lote": "LT-21", "cerrada_en": 90, "regla_cierre_conclusion": "RC-12",
+           "marca_excursiones": "con_excursion", "acumulado": 20}
+        ],
+        "sin_excursiones": ["LT-20"]
+      }
+    },
+    {
+      "caso_id": "A-19",
+      "titulo": "Una lectura, dos lotes de tipos distintos con la misma ventana: dentro para uno, fuera para el otro",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-08",
+        "lotes": [
+          {"lote_id": "LT-30", "tipo": "P-REF", "carga": 0},
+          {"lote_id": "LT-31", "tipo": "P-CON", "carga": 0}
+        ],
+        "lecturas": [{"produccion": 10, "valor": 4.0}]
+      },
+      "esperado": {
+        "lecturas": [
+          {"lote": "LT-30", "indice": 0, "situacion": "dentro_de_rango",
+           "regla_situacion": "RC-04", "imputacion": "imputada"},
+          {"lote": "LT-31", "indice": 0, "situacion": "fuera_de_rango",
+           "regla_situacion": "RC-04", "imputacion": "imputada"}
+        ]
+      }
+    }
+  ]
+}

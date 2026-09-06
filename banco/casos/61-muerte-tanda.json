@@ -1,0 +1,844 @@
+{
+  "fuente": "banco-reglas-cadena-frio.md rev. 1 · §6 · caso de muerte X-03",
+  "nota": "Los cincuenta lotes de la tanda estan escritos uno a uno a proposito: son datos, no un bucle. Cada lote sube 40 minutos respecto del anterior y su excursion dura 31 minutos sobre 30 tolerados.",
+  "casos": [
+    {
+      "caso_id": "X-03",
+      "titulo": "La tanda: 50 hechos actuables distintos y 50 redecisiones. Una accion por hecho, ninguno con cero y ninguno con dos",
+      "reglas": [
+        "RC-10"
+      ],
+      "envio": {
+        "envio_id": "EN-09",
+        "lotes": [
+          {
+            "lote_id": "LT-500",
+            "tipo": "P-REF",
+            "carga": 0,
+            "entrega": 32
+          },
+          {
+            "lote_id": "LT-501",
+            "tipo": "P-REF",
+            "carga": 40,
+            "entrega": 72
+          },
+          {
+            "lote_id": "LT-502",
+            "tipo": "P-REF",
+            "carga": 80,
+            "entrega": 112
+          },
+          {
+            "lote_id": "LT-503",
+            "tipo": "P-REF",
+            "carga": 120,
+            "entrega": 152
+          },
+          {
+            "lote_id": "LT-504",
+            "tipo": "P-REF",
+            "carga": 160,
+            "entrega": 192
+          },
+          {
+            "lote_id": "LT-505",
+            "tipo": "P-REF",
+            "carga": 200,
+            "entrega": 232
+          },
+          {
+            "lote_id": "LT-506",
+            "tipo": "P-REF",
+            "carga": 240,
+            "entrega": 272
+          },
+          {
+            "lote_id": "LT-507",
+            "tipo": "P-REF",
+            "carga": 280,
+            "entrega": 312
+          },
+          {
+            "lote_id": "LT-508",
+            "tipo": "P-REF",
+            "carga": 320,
+            "entrega": 352
+          },
+          {
+            "lote_id": "LT-509",
+            "tipo": "P-REF",
+            "carga": 360,
+            "entrega": 392
+          },
+          {
+            "lote_id": "LT-510",
+            "tipo": "P-REF",
+            "carga": 400,
+            "entrega": 432
+          },
+          {
+            "lote_id": "LT-511",
+            "tipo": "P-REF",
+            "carga": 440,
+            "entrega": 472
+          },
+          {
+            "lote_id": "LT-512",
+            "tipo": "P-REF",
+            "carga": 480,
+            "entrega": 512
+          },
+          {
+            "lote_id": "LT-513",
+            "tipo": "P-REF",
+            "carga": 520,
+            "entrega": 552
+          },
+          {
+            "lote_id": "LT-514",
+            "tipo": "P-REF",
+            "carga": 560,
+            "entrega": 592
+          },
+          {
+            "lote_id": "LT-515",
+            "tipo": "P-REF",
+            "carga": 600,
+            "entrega": 632
+          },
+          {
+            "lote_id": "LT-516",
+            "tipo": "P-REF",
+            "carga": 640,
+            "entrega": 672
+          },
+          {
+            "lote_id": "LT-517",
+            "tipo": "P-REF",
+            "carga": 680,
+            "entrega": 712
+          },
+          {
+            "lote_id": "LT-518",
+            "tipo": "P-REF",
+            "carga": 720,
+            "entrega": 752
+          },
+          {
+            "lote_id": "LT-519",
+            "tipo": "P-REF",
+            "carga": 760,
+            "entrega": 792
+          },
+          {
+            "lote_id": "LT-520",
+            "tipo": "P-REF",
+            "carga": 800,
+            "entrega": 832
+          },
+          {
+            "lote_id": "LT-521",
+            "tipo": "P-REF",
+            "carga": 840,
+            "entrega": 872
+          },
+          {
+            "lote_id": "LT-522",
+            "tipo": "P-REF",
+            "carga": 880,
+            "entrega": 912
+          },
+          {
+            "lote_id": "LT-523",
+            "tipo": "P-REF",
+            "carga": 920,
+            "entrega": 952
+          },
+          {
+            "lote_id": "LT-524",
+            "tipo": "P-REF",
+            "carga": 960,
+            "entrega": 992
+          },
+          {
+            "lote_id": "LT-525",
+            "tipo": "P-REF",
+            "carga": 1000,
+            "entrega": 1032
+          },
+          {
+            "lote_id": "LT-526",
+            "tipo": "P-REF",
+            "carga": 1040,
+            "entrega": 1072
+          },
+          {
+            "lote_id": "LT-527",
+            "tipo": "P-REF",
+            "carga": 1080,
+            "entrega": 1112
+          },
+          {
+            "lote_id": "LT-528",
+            "tipo": "P-REF",
+            "carga": 1120,
+            "entrega": 1152
+          },
+          {
+            "lote_id": "LT-529",
+            "tipo": "P-REF",
+            "carga": 1160,
+            "entrega": 1192
+          },
+          {
+            "lote_id": "LT-530",
+            "tipo": "P-REF",
+            "carga": 1200,
+            "entrega": 1232
+          },
+          {
+            "lote_id": "LT-531",
+            "tipo": "P-REF",
+            "carga": 1240,
+            "entrega": 1272
+          },
+          {
+            "lote_id": "LT-532",
+            "tipo": "P-REF",
+            "carga": 1280,
+            "entrega": 1312
+          },
+          {
+            "lote_id": "LT-533",
+            "tipo": "P-REF",
+            "carga": 1320,
+            "entrega": 1352
+          },
+          {
+            "lote_id": "LT-534",
+            "tipo": "P-REF",
+            "carga": 1360,
+            "entrega": 1392
+          },
+          {
+            "lote_id": "LT-535",
+            "tipo": "P-REF",
+            "carga": 1400,
+            "entrega": 1432
+          },
+          {
+            "lote_id": "LT-536",
+            "tipo": "P-REF",
+            "carga": 1440,
+            "entrega": 1472
+          },
+          {
+            "lote_id": "LT-537",
+            "tipo": "P-REF",
+            "carga": 1480,
+            "entrega": 1512
+          },
+          {
+            "lote_id": "LT-538",
+            "tipo": "P-REF",
+            "carga": 1520,
+            "entrega": 1552
+          },
+          {
+            "lote_id": "LT-539",
+            "tipo": "P-REF",
+            "carga": 1560,
+            "entrega": 1592
+          },
+          {
+            "lote_id": "LT-540",
+            "tipo": "P-REF",
+            "carga": 1600,
+            "entrega": 1632
+          },
+          {
+            "lote_id": "LT-541",
+            "tipo": "P-REF",
+            "carga": 1640,
+            "entrega": 1672
+          },
+          {
+            "lote_id": "LT-542",
+            "tipo": "P-REF",
+            "carga": 1680,
+            "entrega": 1712
+          },
+          {
+            "lote_id": "LT-543",
+            "tipo": "P-REF",
+            "carga": 1720,
+            "entrega": 1752
+          },
+          {
+            "lote_id": "LT-544",
+            "tipo": "P-REF",
+            "carga": 1760,
+            "entrega": 1792
+          },
+          {
+            "lote_id": "LT-545",
+            "tipo": "P-REF",
+            "carga": 1800,
+            "entrega": 1832
+          },
+          {
+            "lote_id": "LT-546",
+            "tipo": "P-REF",
+            "carga": 1840,
+            "entrega": 1872
+          },
+          {
+            "lote_id": "LT-547",
+            "tipo": "P-REF",
+            "carga": 1880,
+            "entrega": 1912
+          },
+          {
+            "lote_id": "LT-548",
+            "tipo": "P-REF",
+            "carga": 1920,
+            "entrega": 1952
+          },
+          {
+            "lote_id": "LT-549",
+            "tipo": "P-REF",
+            "carga": 1960,
+            "entrega": 1992
+          }
+        ],
+        "lecturas": [
+          {
+            "desde": 0,
+            "hasta": 30,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 31,
+            "valor": 4.0
+          },
+          {
+            "desde": 40,
+            "hasta": 70,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 71,
+            "valor": 4.0
+          },
+          {
+            "desde": 80,
+            "hasta": 110,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 111,
+            "valor": 4.0
+          },
+          {
+            "desde": 120,
+            "hasta": 150,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 151,
+            "valor": 4.0
+          },
+          {
+            "desde": 160,
+            "hasta": 190,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 191,
+            "valor": 4.0
+          },
+          {
+            "desde": 200,
+            "hasta": 230,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 231,
+            "valor": 4.0
+          },
+          {
+            "desde": 240,
+            "hasta": 270,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 271,
+            "valor": 4.0
+          },
+          {
+            "desde": 280,
+            "hasta": 310,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 311,
+            "valor": 4.0
+          },
+          {
+            "desde": 320,
+            "hasta": 350,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 351,
+            "valor": 4.0
+          },
+          {
+            "desde": 360,
+            "hasta": 390,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 391,
+            "valor": 4.0
+          },
+          {
+            "desde": 400,
+            "hasta": 430,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 431,
+            "valor": 4.0
+          },
+          {
+            "desde": 440,
+            "hasta": 470,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 471,
+            "valor": 4.0
+          },
+          {
+            "desde": 480,
+            "hasta": 510,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 511,
+            "valor": 4.0
+          },
+          {
+            "desde": 520,
+            "hasta": 550,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 551,
+            "valor": 4.0
+          },
+          {
+            "desde": 560,
+            "hasta": 590,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 591,
+            "valor": 4.0
+          },
+          {
+            "desde": 600,
+            "hasta": 630,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 631,
+            "valor": 4.0
+          },
+          {
+            "desde": 640,
+            "hasta": 670,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 671,
+            "valor": 4.0
+          },
+          {
+            "desde": 680,
+            "hasta": 710,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 711,
+            "valor": 4.0
+          },
+          {
+            "desde": 720,
+            "hasta": 750,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 751,
+            "valor": 4.0
+          },
+          {
+            "desde": 760,
+            "hasta": 790,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 791,
+            "valor": 4.0
+          },
+          {
+            "desde": 800,
+            "hasta": 830,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 831,
+            "valor": 4.0
+          },
+          {
+            "desde": 840,
+            "hasta": 870,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 871,
+            "valor": 4.0
+          },
+          {
+            "desde": 880,
+            "hasta": 910,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 911,
+            "valor": 4.0
+          },
+          {
+            "desde": 920,
+            "hasta": 950,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 951,
+            "valor": 4.0
+          },
+          {
+            "desde": 960,
+            "hasta": 990,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 991,
+            "valor": 4.0
+          },
+          {
+            "desde": 1000,
+            "hasta": 1030,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1031,
+            "valor": 4.0
+          },
+          {
+            "desde": 1040,
+            "hasta": 1070,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1071,
+            "valor": 4.0
+          },
+          {
+            "desde": 1080,
+            "hasta": 1110,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1111,
+            "valor": 4.0
+          },
+          {
+            "desde": 1120,
+            "hasta": 1150,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1151,
+            "valor": 4.0
+          },
+          {
+            "desde": 1160,
+            "hasta": 1190,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1191,
+            "valor": 4.0
+          },
+          {
+            "desde": 1200,
+            "hasta": 1230,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1231,
+            "valor": 4.0
+          },
+          {
+            "desde": 1240,
+            "hasta": 1270,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1271,
+            "valor": 4.0
+          },
+          {
+            "desde": 1280,
+            "hasta": 1310,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1311,
+            "valor": 4.0
+          },
+          {
+            "desde": 1320,
+            "hasta": 1350,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1351,
+            "valor": 4.0
+          },
+          {
+            "desde": 1360,
+            "hasta": 1390,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1391,
+            "valor": 4.0
+          },
+          {
+            "desde": 1400,
+            "hasta": 1430,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1431,
+            "valor": 4.0
+          },
+          {
+            "desde": 1440,
+            "hasta": 1470,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1471,
+            "valor": 4.0
+          },
+          {
+            "desde": 1480,
+            "hasta": 1510,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1511,
+            "valor": 4.0
+          },
+          {
+            "desde": 1520,
+            "hasta": 1550,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1551,
+            "valor": 4.0
+          },
+          {
+            "desde": 1560,
+            "hasta": 1590,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1591,
+            "valor": 4.0
+          },
+          {
+            "desde": 1600,
+            "hasta": 1630,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1631,
+            "valor": 4.0
+          },
+          {
+            "desde": 1640,
+            "hasta": 1670,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1671,
+            "valor": 4.0
+          },
+          {
+            "desde": 1680,
+            "hasta": 1710,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1711,
+            "valor": 4.0
+          },
+          {
+            "desde": 1720,
+            "hasta": 1750,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1751,
+            "valor": 4.0
+          },
+          {
+            "desde": 1760,
+            "hasta": 1790,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1791,
+            "valor": 4.0
+          },
+          {
+            "desde": 1800,
+            "hasta": 1830,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1831,
+            "valor": 4.0
+          },
+          {
+            "desde": 1840,
+            "hasta": 1870,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1871,
+            "valor": 4.0
+          },
+          {
+            "desde": 1880,
+            "hasta": 1910,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1911,
+            "valor": 4.0
+          },
+          {
+            "desde": 1920,
+            "hasta": 1950,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1951,
+            "valor": 4.0
+          },
+          {
+            "desde": 1960,
+            "hasta": 1990,
+            "cada": 5,
+            "valor": 9.0
+          },
+          {
+            "produccion": 1991,
+            "valor": 4.0
+          }
+        ]
+      },
+      "redecisiones": 1,
+      "esperado": {
+        "acciones": {
+          "total": 50,
+          "clases": [
+            "DISPOSICION"
+          ]
+        },
+        "lotes": [
+          {
+            "lote": "LT-500",
+            "aptitud": "no_apto",
+            "regla_aptitud": "RC-08",
+            "acumulado": 31,
+            "clase_accion": "DISPOSICION"
+          },
+          {
+            "lote": "LT-549",
+            "aptitud": "no_apto",
+            "acumulado": 31,
+            "clase_accion": "DISPOSICION"
+          }
+        ]
+      }
+    }
+  ]
+}

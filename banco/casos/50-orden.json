@@ -1,0 +1,183 @@
+{
+  "fuente": "banco-reglas-cadena-frio.md rev. 1 · §5 · casos de orden O-01…O-08",
+  "nota": "Cada caso declara la secuencia emitida y la inversion que introduce la entrega. El desenlace es siempre el mismo: el de la corrida de referencia, que se calcula sobre el ORDEN DE PRODUCCION. `difiere_por_llegada` dice si un sistema que leyera por orden de llegada concluiria otra cosa; donde es falso, la inversion no era decisiva.",
+  "casos": [
+    {
+      "caso_id": "O-01",
+      "titulo": "La lectura de vuelta a rango se entrega antes que las de fuera de rango: sigue no apto",
+      "reglas": ["RC-08"],
+      "envio": {
+        "envio_id": "EN-05",
+        "lotes": [{"lote_id": "LT-40", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 40, "valor": 9.0},
+          {"produccion": 41, "valor": 4.0, "llegada": 9.5}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-40", "acumulado": 31, "aptitud": "no_apto",
+                   "regla_aptitud": "RC-08"}],
+        "difiere_por_llegada": true
+      }
+    },
+    {
+      "caso_id": "O-02",
+      "titulo": "Las lecturas de cierre de dos excursiones se entregan intercambiadas: acumulado 22",
+      "reglas": ["RC-06", "RC-07"],
+      "envio": {
+        "envio_id": "EN-05",
+        "lotes": [{"lote_id": "LT-41", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 21, "valor": 9.0},
+          {"produccion": 22, "valor": 4.0, "llegada": 34.5},
+          {"produccion": 23, "valor": 4.0},
+          {"desde": 24, "hasta": 33, "valor": 9.0},
+          {"produccion": 34, "valor": 4.0, "llegada": 22.5}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-41", "acumulado": 22, "regla_acumulado": "RC-07",
+                   "aptitud": "apto"}],
+        "excursiones": [{"lote": "LT-41", "apertura": 10, "cierre": 22,
+                         "duracion": 12}],
+        "difiere_por_llegada": false
+      }
+    },
+    {
+      "caso_id": "O-03",
+      "titulo": "Por llegada la excursion quedaria abierta; por produccion el acumulado supera: DISPOSICION, no RESCATE",
+      "reglas": ["RC-09"],
+      "envio": {
+        "envio_id": "EN-05",
+        "lotes": [{"lote_id": "LT-42", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 40, "valor": 9.0},
+          {"produccion": 41, "valor": 4.0, "llegada": 21.5}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-42", "acumulado": 31, "clase_accion": "DISPOSICION",
+                   "regla_clase_accion": "RC-09"}],
+        "difiere_por_llegada": true
+      }
+    },
+    {
+      "caso_id": "O-04",
+      "titulo": "Lectura producida en T0+30 y entregada en T0+95, con el lote entregado en T0+60: se imputa igual",
+      "reglas": ["RC-02"],
+      "envio": {
+        "envio_id": "EN-06",
+        "lotes": [{"lote_id": "LT-43", "tipo": "P-REF", "carga": 0, "entrega": 60}],
+        "lecturas": [
+          {"desde": 0, "hasta": 29, "valor": 4.0},
+          {"produccion": 30, "valor": 9.0, "llegada": 95},
+          {"desde": 31, "hasta": 70, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-43", "indice": 30, "imputacion": "imputada",
+                      "regla_imputacion": "RC-02", "situacion": "fuera_de_rango",
+                      "regla_situacion": "RC-04"}],
+        "difiere_por_llegada": true
+      }
+    },
+    {
+      "caso_id": "O-05",
+      "titulo": "La lectura de T0+10 se entrega despues de las de T0+25: afecta a LT-20 y no a LT-21",
+      "reglas": ["RC-02", "RC-04"],
+      "envio": {
+        "envio_id": "EN-07",
+        "lotes": [
+          {"lote_id": "LT-20", "tipo": "P-REF", "carga": 0},
+          {"lote_id": "LT-21", "tipo": "P-REF", "carga": 20}
+        ],
+        "lecturas": [
+          {"desde": 0, "hasta": 9, "valor": 4.0},
+          {"produccion": 10, "valor": 9.0, "llegada": 26},
+          {"desde": 11, "hasta": 30, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lecturas": [
+          {"lote": "LT-20", "indice": 10, "imputacion": "imputada",
+           "situacion": "fuera_de_rango", "regla_situacion": "RC-04"},
+          {"lote": "LT-21", "indice": 10, "imputacion": "no_imputada",
+           "regla_imputacion": "RC-02", "situacion": null}
+        ],
+        "difiere_por_llegada": true
+      }
+    },
+    {
+      "caso_id": "O-06",
+      "titulo": "Apertura partida: las lecturas fuera de rango llegan intercaladas con otras dentro de rango. La excursion abre igual",
+      "reglas": ["RC-05"],
+      "envio": {
+        "envio_id": "EN-05",
+        "lotes": [{"lote_id": "LT-44", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"produccion": 10, "valor": 9.0, "llegada": 10},
+          {"produccion": 11, "valor": 9.0, "llegada": 20},
+          {"produccion": 12, "valor": 9.0, "llegada": 11},
+          {"produccion": 13, "valor": 9.0, "llegada": 21},
+          {"produccion": 14, "valor": 9.0, "llegada": 12},
+          {"produccion": 15, "valor": 9.0, "llegada": 22},
+          {"desde": 16, "hasta": 20, "valor": 4.0, "llegada_desde": 13}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-44", "apertura": 10, "cierre": 16,
+                         "duracion": 6, "transitoria": false,
+                         "regla_apertura": "RC-05"}],
+        "difiere_por_llegada": true
+      }
+    },
+    {
+      "caso_id": "O-07",
+      "titulo": "CONTROL. Se invierten dos lecturas dentro de rango que no cruzan ningun umbral: la conclusion no cambia, y esta inversion no cuenta",
+      "control": true,
+      "reglas": [],
+      "envio": {
+        "envio_id": "EN-05",
+        "lotes": [{"lote_id": "LT-45", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 2, "valor": 4.0},
+          {"produccion": 3, "valor": 4.0, "llegada": 7},
+          {"desde": 4, "hasta": 6, "valor": 4.0},
+          {"produccion": 7, "valor": 4.0, "llegada": 3},
+          {"desde": 8, "hasta": 10, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-45", "aptitud": "apto", "acumulado": 0,
+                   "marca_secuencia": "completa"}],
+        "difiere_por_llegada": false
+      }
+    },
+    {
+      "caso_id": "O-08",
+      "titulo": "Las cuarenta lecturas del envio entregadas en orden inverso completo: conclusion identica a la referencia, campo a campo",
+      "reglas": ["RC-05", "RC-07"],
+      "envio": {
+        "envio_id": "EN-05",
+        "lotes": [{"lote_id": "LT-46", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 9, "valor": 4.0, "llegada_desde": 39, "llegada_cada": -1},
+          {"desde": 10, "hasta": 24, "valor": 9.0, "llegada_desde": 29, "llegada_cada": -1},
+          {"desde": 25, "hasta": 39, "valor": 4.0, "llegada_desde": 14, "llegada_cada": -1}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-46", "acumulado": 15, "aptitud": "apto",
+                   "regla_aptitud": "RC-08", "clase_accion": "NINGUNA",
+                   "marca_secuencia": "completa"}],
+        "excursiones": [{"lote": "LT-46", "apertura": 10, "cierre": 25,
+                         "duracion": 15}],
+        "difiere_por_llegada": true
+      }
+    }
+  ]
+}

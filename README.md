@@ -1,11 +1,13 @@
 # Cadena de frío en transporte · P1
 
-> **Estado: sin código.** Este repositorio contiene tres textos y nada más.
-> Nada está construido. Nada está medido. Nadie externo lo ha leído todavía.
+> **Estado: hay código, y no mide la afirmación de §2.** Lo que existe es un
+> **banco de reglas de cadena de frío que se ejecuta** — 64 casos, trece piezas
+> apagables— y su corrida termina hoy en **INVÁLIDO**, ni verde ni rojo, por un
+> motivo que está escrito en `banco/NOTAS-IMPLEMENTACION.md`.
 >
-> Este texto existe para que alguien pueda **refutar el planteamiento antes de que
-> exista código**, cuando refutarlo cuesta reescribir un texto y no reescribir un
-> sistema.
+> **Nada de la afirmación de §2 está medido.** El banco no mata ningún proceso y
+> no dice nada sobre orden ni sobre no duplicar acciones. Nadie externo ha leído
+> esto todavía.
 
 En los documentos internos el proyecto figura con el nombre «logística en tiempo
 real con cadena de frío». Aquí no se usa ese nombre: la inmediatez es una decisión
@@ -89,14 +91,20 @@ número de medición en un repositorio sin medición se lee como un resultado.**
 
 Esta es la sección más importante del documento. Cada punto es comprobable.
 
-1. **No afirma que exista software.** No hay una sola línea de código de producto.
-   Comprobación: listar el contenido del repositorio.
-2. **No afirma que la afirmación de §2 se cumpla, ni en parte.** No se ha ejecutado
-   ninguna medición. No hay corrida, ni resultado, ni porcentaje, ni verde.
-   **Cualquier cifra de rendimiento o de cumplimiento que alguien lea aquí, la
+1. **No afirma que exista un producto.** Lo que hay es el banco de reglas de §4b,
+   que se ejecuta y no sirve a nadie: no hay ingesta, ni almacenamiento, ni
+   interfaz, ni nada que un transportista pueda usar. Comprobación: listar el
+   contenido del repositorio y correr el único comando que hay.
+2. **No afirma que la afirmación de §2 se cumpla, ni en parte.** El banco mide si
+   las reglas de temperatura concluyen lo que deben y nombran cuál de ellas lo
+   concluyó. **De orden y de no duplicar acciones no mide nada**, y su propia
+   salida lo dice en la última línea. No hay porcentaje, ni verde, ni resultado
+   sobre §2. **Cualquier cifra de cumplimiento de §2 que alguien lea aquí, la
    habrá puesto él.**
-3. **No afirma nada sobre cómo está construido ni sobre cómo se comportaría ante
-   una caída, una carga o una interrupción.** No está construido.
+3. **No afirma nada sobre cómo se comportaría ante una caída, una carga o una
+   interrupción.** En el banco **no muere ningún proceso**: las muertes de los
+   casos X-01…X-07 están modeladas como decidir dos veces lo mismo, que es una
+   regla del dominio y no una caída real.
 4. **No afirma que los valores del dominio estén validados.** Cuánto dura una
    desviación antes de contar, cuánto se tolera antes de perder el lote y cuánto
    tiempo se conserva el registro son **valores de trabajo adoptados, no
@@ -123,17 +131,71 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
 
 | Qué | Estado |
 |---|---|
-| Código de producto | **Ninguno**, y esa es la condición de este punto del plan |
+| Código de producto | **Ninguno.** Lo que hay es el banco de reglas de §4b |
+| Banco de reglas | **Ejecutable.** 64 casos pasan; la corrida termina en **INVÁLIDO** |
 | Medición de la afirmación de §2 | **Ninguna** |
 | Lectura por alguien externo | **NO MEDIDA** — declarada por escrito, ver `evidencia/tanda-0.md` |
 | Valores del dominio | **Cerrados como valores de trabajo**, sin validación uno a uno |
-| Contenido del repositorio | Este README y los dos textos que enlaza |
 
-**Por qué se publica algo que no hace nada.** Porque el plan de trabajo tiene un
-primer tramo que es **el único sin código**, y su producto entero es este
-planteamiento escrito de forma que se pueda atacar. Si el encuadre está mal, hoy
-corregirlo cuesta editar un texto. Los demás tramos no se describen aquí:
-describirlos sería contar lo que aún no existe.
+**Por qué se publicó primero algo que no hacía nada.** Porque el plan de trabajo
+tiene un primer tramo que es **el único sin código**, y su producto entero era
+este planteamiento escrito de forma que se pudiera atacar. Si el encuadre estaba
+mal, corregirlo costaba editar un texto. Los tramos que aún no existen no se
+describen aquí: describirlos sería contar lo que no hay.
+
+---
+
+## 4b · El banco de reglas, y por qué su corrida no está en verde
+
+```
+python ejecutar.py
+```
+
+Un solo comando. Sin instalar nada, sin imagen, sin credencial y sin conexión —
+solo Python y su biblioteca estándar. Imprime la tabla entera **con los fallos
+dentro**: no se promedia, no se descarta y no se resume en un porcentaje.
+
+Lo que hay dentro son las doce reglas de cadena de frío y los 64 casos que las
+ejercen, **escritos como datos** en `banco/casos/*.json`, no como funciones de
+prueba. Cada conclusión tiene que **nombrar la regla que la produjo**, también
+cuando la conclusión es permisiva: «dentro de rango» no es la ausencia de
+veredicto, es un veredicto. Un valor correcto sin regla que lo nombre **no cuenta
+como conclusión** y el caso falla.
+
+Hoy la corrida termina así:
+
+| | |
+|---|---|
+| 64 casos ejecutados, 61 atribuibles a una regla | **64 pasan, 0 fallan** |
+| Determinismo · dos corridas con reloj distinto | **PASA** |
+| Ninguna conclusión sin nombrar su regla | **PASA** |
+| Al apagar cada pieza, ¿caen todos sus casos? | **13/13** |
+| ¿Dice la mutación **cuál** pieza falta, y no solo que falta una? | **13/13** |
+| ¿Se queda la mutación dentro de su regla? | **13/13** |
+| ¿Hasta dónde puede llegar legítimamente su cascada? | **NO EVALUABLE en las 13** |
+| El tipo de producto vive en el lote, no en el envío | **PASA** |
+| Un solo comando, sin dependencias | **PASA** |
+| **Desenlace** | **INVÁLIDO** (código de salida 2) |
+
+**INVÁLIDO no es un rojo disfrazado ni un verde con reservas.** El código no está
+mal: la última condición **no se puede evaluar** porque le falta un dato que
+nadie ha escrito todavía. El dominio encadena —apagar el umbral de temperatura
+hace que no haya excursiones, ni acumulado, ni lote perdido, y con él cambian
+cuarenta y tres casos—, así que para juzgar si una cascada llegó demasiado lejos
+hay que saber primero **qué regla alimenta a qué regla**, y eso es una afirmación
+sobre el dominio que este banco no declara. Publicarlo como rojo diría que el
+código falla, y no falla. Publicarlo como verde diría que la condición se
+comprobó, y no se comprobó. **Por eso hay un tercer desenlace, y por eso este
+proyecto sostiene que un instrumento de medición tiene que saber negarse.**
+
+**Y la corrida enseña que las condiciones pueden ponerse rojas**, en vez de
+afirmarlo: cada ejecución las ejerce contra defectos fabricados a propósito
+—fusionar las dos mitades de una regla, acoplar dos reglas que deberían ser
+independientes, declarar una cascada vacía— y publica el resultado. *Una
+comprobación que no se ha visto fallar no está demostrado que mida.*
+
+El detalle, con los números pieza por pieza y con lo que deliberadamente **no** se
+tocó para no fabricar un verde, está en **`banco/NOTAS-IMPLEMENTACION.md`**.
 
 ---
 
@@ -145,8 +207,12 @@ describirlos sería contar lo que aún no existe.
    de ser honesto.
 3. **`decisiones/decisiones-de-negocio.md`** — los valores del dominio, con valor
    exacto y con la línea de quién decidió cada uno.
+4. **`banco/NOTAS-IMPLEMENTACION.md`** — por qué la corrida termina en INVÁLIDO,
+   qué defecto de modelado se encontró por el camino y qué tres comprobaciones
+   daban rojo sobre código correcto.
 
-No hay nada más que leer, y no hay nada que ejecutar.
+Y una cosa que ejecutar: `python ejecutar.py`. Tarda menos de lo que se tarda en
+leer esta línea y no deja nada instalado.
 
 ---
 
@@ -162,6 +228,13 @@ ninguna exige instalar nada:
    exactamente lo que tumbó la redacción anterior.
 3. **¿Defenderías los valores de `decisiones/decisiones-de-negocio.md`?** Si no,
    di cuál y con qué lo cambiarías. Todavía son reversibles sin coste.
+
+Y una cuarta que sí exige ejecutar, y que es la que más interesa:
+
+4. **¿Te parece que el INVÁLIDO de §4b es honestidad o es una excusa?** Si crees
+   que es una forma elegante de no dar un rojo, dilo. La respuesta está en
+   `banco/NOTAS-IMPLEMENTACION.md` §2, que dice exactamente qué se decidió **no**
+   tocar para no fabricar un verde — y esa decisión se puede atacar.
 
 **Las respuestas se transcriben sin corregir** en `evidencia/tanda-0.md`, incluidas
 las que dejen mal al planteamiento. Una respuesta editada no sirve para nada.

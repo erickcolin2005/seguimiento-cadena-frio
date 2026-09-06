@@ -1,0 +1,112 @@
+{
+  "fuente": "banco-reglas-cadena-frio.md rev. 1 · §4 · casos no evaluables R-01…R-06",
+  "nota": "No evaluar una lectura no es descartarla: se conserva.",
+  "casos": [
+    {
+      "caso_id": "R-01",
+      "titulo": "Lectura atribuida a un envio inexistente: no se evalua y se conserva",
+      "reglas": ["RC-01"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-01", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": 4.0, "envio_id": "EN-99"}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-01", "indice": 0, "atribucion": "no_evaluada",
+                      "regla_atribucion": "RC-01", "conservada": true,
+                      "imputacion": null, "validez": null, "situacion": null}]
+      }
+    },
+    {
+      "caso_id": "R-02",
+      "titulo": "Envio sin ningun lote a bordo: no se evalua, con el mismo identificador que R-01",
+      "reglas": ["RC-01"],
+      "envio": {
+        "envio_id": "EN-02",
+        "lotes": [{"lote_id": "LT-28", "tipo": "P-REF", "carga": 0, "entrega": 1}],
+        "lecturas": [{"produccion": 1, "valor": 4.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-28", "indice": 0, "atribucion": "no_evaluada",
+                      "regla_atribucion": "RC-01", "conservada": true,
+                      "imputacion": null, "validez": null, "situacion": null}]
+      }
+    },
+    {
+      "caso_id": "R-03",
+      "titulo": "Lectura producida despues de la entrega del lote: no se le imputa",
+      "reglas": ["RC-02"],
+      "envio": {
+        "envio_id": "EN-04",
+        "lotes": [
+          {"lote_id": "LT-02", "tipo": "P-REF", "carga": 0, "entrega": 60},
+          {"lote_id": "LT-29", "tipo": "P-REF", "carga": 0}
+        ],
+        "lecturas": [{"produccion": 70, "valor": 9.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-02", "indice": 0, "atribucion": "evaluada",
+                      "imputacion": "no_imputada", "regla_imputacion": "RC-02",
+                      "situacion": null, "conservada": true}]
+      }
+    },
+    {
+      "caso_id": "R-04",
+      "titulo": "Lectura producida antes de la carga del lote: no se le imputa",
+      "reglas": ["RC-02"],
+      "envio": {
+        "envio_id": "EN-04",
+        "lotes": [
+          {"lote_id": "LT-03", "tipo": "P-REF", "carga": 20},
+          {"lote_id": "LT-29", "tipo": "P-REF", "carga": 0}
+        ],
+        "lecturas": [{"produccion": 5, "valor": 9.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-03", "indice": 0, "atribucion": "evaluada",
+                      "imputacion": "no_imputada", "regla_imputacion": "RC-02",
+                      "situacion": null, "conservada": true}]
+      }
+    },
+    {
+      "caso_id": "R-05",
+      "titulo": "Lectura sin valor de temperatura: invalida, y crea hueco",
+      "reglas": ["RC-03"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-01", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 2, "valor": 4.0},
+          {"produccion": 3},
+          {"desde": 4, "hasta": 6, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-01", "indice": 3, "validez": "invalida",
+                      "regla_validez": "RC-03", "situacion": null,
+                      "conservada": true}],
+        "lotes": [{"lote": "LT-01", "marca_secuencia": "hueco_no_determinante",
+                   "regla_marca_secuencia": "RC-11"}]
+      }
+    },
+    {
+      "caso_id": "R-06",
+      "titulo": "Lectura de -55 grados: fuera del rango de la sonda, invalida. No es congelado extremo: es una sonda que miente",
+      "reglas": ["RC-03"],
+      "envio": {
+        "envio_id": "EN-02",
+        "lotes": [{"lote_id": "LT-17", "tipo": "P-CON", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 2, "valor": -20.0},
+          {"produccion": 3, "valor": -55.0},
+          {"desde": 4, "hasta": 6, "valor": -20.0}
+        ]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-17", "indice": 3, "validez": "invalida",
+                      "regla_validez": "RC-03", "situacion": null,
+                      "conservada": true}]
+      }
+    }
+  ]
+}

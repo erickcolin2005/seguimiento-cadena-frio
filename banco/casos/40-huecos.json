@@ -1,0 +1,94 @@
+{
+  "fuente": "banco-reglas-cadena-frio.md rev. 1 · §4 · casos de hueco H-01…H-04",
+  "nota": "Lo que no se midio no se afirma. Un hueco determinante impide declarar apto, y NO produce DISPOSICION: no consta que se perdiera.",
+  "casos": [
+    {
+      "caso_id": "H-01",
+      "titulo": "Hueco de 3 minutos con la minima en 5: apto, con hueco no determinante",
+      "reglas": ["RC-11"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-32", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 10, "valor": 4.0},
+          {"desde": 14, "hasta": 20, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-32", "aptitud": "apto", "regla_aptitud": "RC-08",
+                   "marca_secuencia": "hueco_no_determinante",
+                   "regla_marca_secuencia": "RC-11", "provisional": false}]
+      }
+    },
+    {
+      "caso_id": "H-02",
+      "titulo": "Hueco de 6 minutos: no declarable apto, conclusion provisional, y sin DISPOSICION",
+      "reglas": ["RC-11"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-33", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 10, "valor": 4.0},
+          {"desde": 17, "hasta": 25, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-33", "aptitud": "no_declarable_apto",
+                   "regla_aptitud": "RC-11", "provisional": true,
+                   "marca_secuencia": "hueco_determinante",
+                   "regla_marca_secuencia": "RC-11",
+                   "clase_accion": "NINGUNA"}],
+        "acciones": {"total": 0}
+      }
+    },
+    {
+      "caso_id": "H-03",
+      "titulo": "El hueco se cierra con las lecturas que faltaban: la conclusion se recalcula y se actua una sola vez",
+      "reglas": ["RC-11", "RC-09", "RC-10"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-34", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 10, "valor": 4.0},
+          {"desde": 11, "hasta": 45, "valor": 9.0, "llegada_desde": 100},
+          {"desde": 46, "hasta": 49, "valor": 4.0}
+        ]
+      },
+      "redecisiones": 1,
+      "esperado": {
+        "lotes": [{"lote": "LT-34", "marca_secuencia": "completa",
+                   "regla_marca_secuencia": "RC-11", "provisional": false,
+                   "acumulado": 35, "aptitud": "no_apto",
+                   "clase_accion": "DISPOSICION"}],
+        "acciones": {"total": 1, "por_lote": {"LT-34": 1}}
+      }
+    },
+    {
+      "caso_id": "H-04",
+      "titulo": "Hueco causado por lecturas invalidas: mismo tratamiento, y no rompe la consecutividad de RC-05",
+      "reglas": ["RC-03", "RC-11"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-35", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 12, "valor": 9.0},
+          {"desde": 13, "hasta": 18},
+          {"desde": 19, "hasta": 20, "valor": 9.0},
+          {"produccion": 21, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-35", "apertura": 10, "cierre": 21,
+                         "duracion": 11, "transitoria": false,
+                         "regla_apertura": "RC-05", "regla_cierre": "RC-06"}],
+        "lotes": [{"lote": "LT-35", "marca_secuencia": "hueco_determinante",
+                   "regla_marca_secuencia": "RC-11", "provisional": true,
+                   "aptitud": "no_declarable_apto", "regla_aptitud": "RC-11",
+                   "acumulado": 11}],
+        "lecturas": [{"lote": "LT-35", "indice": 5, "validez": "invalida",
+                      "regla_validez": "RC-03"}]
+      }
+    }
+  ]
+}

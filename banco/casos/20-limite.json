@@ -1,0 +1,345 @@
+{
+  "fuente": "banco-reglas-cadena-frio.md rev. 1 · §4 · casos limite L-01…L-20",
+  "nota": "Un borde que casi acierta es fallo. Los limites son inclusive.",
+  "casos": [
+    {
+      "caso_id": "L-01",
+      "titulo": "Lectura producida antes de la entrega y recibida despues: se imputa al lote",
+      "reglas": ["RC-02"],
+      "envio": {
+        "envio_id": "EN-04",
+        "lotes": [{"lote_id": "LT-02", "tipo": "P-REF", "carga": 0, "entrega": 60}],
+        "lecturas": [{"produccion": 30, "valor": 9.0, "llegada": 95}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-02", "indice": 0, "imputacion": "imputada",
+                      "regla_imputacion": "RC-02", "situacion": "fuera_de_rango"}]
+      }
+    },
+    {
+      "caso_id": "L-02",
+      "titulo": "Lectura de -40,0 grados exactos: valida, y dentro de rango para P-CON",
+      "reglas": ["RC-03", "RC-04"],
+      "envio": {
+        "envio_id": "EN-02",
+        "lotes": [{"lote_id": "LT-17", "tipo": "P-CON", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": -40.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-17", "indice": 0, "validez": "valida",
+                      "regla_validez": "RC-03", "situacion": "dentro_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "L-03",
+      "titulo": "P-REF a 2,0 grados: borde inferior inclusive, dentro",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-01", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": 2.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-01", "indice": 0, "situacion": "dentro_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "L-04",
+      "titulo": "P-REF a 6,0 grados: borde superior inclusive, dentro",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-01", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": 6.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-01", "indice": 0, "situacion": "dentro_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "L-05",
+      "titulo": "P-REF a 6,1 grados: fuera de rango. Discriminante del umbral",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-01", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": 6.1}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-01", "indice": 0, "situacion": "fuera_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "L-06",
+      "titulo": "P-CON a -18,0 grados: inclusive, dentro",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-02",
+        "lotes": [{"lote_id": "LT-17", "tipo": "P-CON", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": -18.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-17", "indice": 0, "situacion": "dentro_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "L-07",
+      "titulo": "P-CON a -17,9 grados: fuera. La misma cifra no esta dentro para ningun otro tipo",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-02",
+        "lotes": [{"lote_id": "LT-17", "tipo": "P-CON", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": -17.9}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-17", "indice": 0, "situacion": "fuera_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "L-08",
+      "titulo": "P-FRE a 18,0 grados: inclusive, dentro",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-03",
+        "lotes": [{"lote_id": "LT-18", "tipo": "P-FRE", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": 18.0}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-18", "indice": 0, "situacion": "dentro_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "L-09",
+      "titulo": "P-FRE a 11,9 grados: fuera por frio. El rango tiene dos lados",
+      "reglas": ["RC-04"],
+      "envio": {
+        "envio_id": "EN-03",
+        "lotes": [{"lote_id": "LT-18", "tipo": "P-FRE", "carga": 0}],
+        "lecturas": [{"produccion": 1, "valor": 11.9}]
+      },
+      "esperado": {
+        "lecturas": [{"lote": "LT-18", "indice": 0, "situacion": "fuera_de_rango",
+                      "regla_situacion": "RC-04"}]
+      }
+    },
+    {
+      "caso_id": "L-10",
+      "titulo": "Cinco minutos exactos fuera de rango en P-REF: abre excursion (minimo inclusive)",
+      "reglas": ["RC-05"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-19", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 14, "valor": 9.0},
+          {"produccion": 15, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-19", "apertura": 10, "cierre": 15,
+                         "duracion": 5, "transitoria": false,
+                         "regla_apertura": "RC-05"}],
+        "lotes": [{"lote": "LT-19", "marca_excursiones": "con_excursion",
+                   "acumulado": 5}]
+      }
+    },
+    {
+      "caso_id": "L-11",
+      "titulo": "Cuatro minutos fuera de rango en P-REF: desviacion transitoria, sin excursion",
+      "reglas": ["RC-05"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-19", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 13, "valor": 9.0},
+          {"produccion": 14, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-19", "incluir_transitorias": true,
+                         "apertura": 10, "cierre": 14, "duracion": 4,
+                         "transitoria": true, "regla_apertura": "RC-05"}],
+        "lotes": [{"lote": "LT-19", "marca_excursiones": "sin_excursion",
+                   "regla_marca_excursiones": "RC-05", "acumulado": 0}],
+        "sin_excursiones": ["LT-19"]
+      }
+    },
+    {
+      "caso_id": "L-12",
+      "titulo": "Dos minutos exactos fuera de rango en P-CON: abre. Con los mismos dos, P-REF no abriria",
+      "reglas": ["RC-05"],
+      "envio": {
+        "envio_id": "EN-02",
+        "lotes": [{"lote_id": "LT-17", "tipo": "P-CON", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": -20.0},
+          {"desde": 10, "hasta": 11, "valor": -10.0},
+          {"produccion": 12, "valor": -20.0}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-17", "apertura": 10, "cierre": 12,
+                         "duracion": 2, "transitoria": false}],
+        "lotes": [{"lote": "LT-17", "marca_excursiones": "con_excursion"}]
+      }
+    },
+    {
+      "caso_id": "L-13",
+      "titulo": "Dos lecturas dentro de rango seguidas: cierra con la primera, 12 minutos",
+      "reglas": ["RC-06"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-04", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 21, "valor": 9.0},
+          {"desde": 22, "hasta": 23, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-04", "apertura": 10, "cierre": 22,
+                         "duracion": 12, "regla_cierre": "RC-06"}]
+      }
+    },
+    {
+      "caso_id": "L-14",
+      "titulo": "Lote entregado con la excursion abierta: cierra en la entrega, 10 minutos",
+      "reglas": ["RC-06", "RC-12"],
+      "envio": {
+        "envio_id": "EN-04",
+        "lotes": [{"lote_id": "LT-22", "tipo": "P-REF", "carga": 0, "entrega": 60}],
+        "lecturas": [
+          {"desde": 48, "hasta": 49, "valor": 4.0},
+          {"desde": 50, "hasta": 65, "valor": 9.0}
+        ]
+      },
+      "esperado": {
+        "excursiones": [{"lote": "LT-22", "apertura": 50, "cierre": 60,
+                         "duracion": 10, "abierta": false,
+                         "regla_cierre": "RC-06+RC-12"}],
+        "lotes": [{"lote": "LT-22", "acumulado": 10, "cerrada_en": 60,
+                   "regla_cierre_conclusion": "RC-12"}]
+      }
+    },
+    {
+      "caso_id": "L-15",
+      "titulo": "Acumulado de 30 minutos exactos: apto. Superar es estricto",
+      "reglas": ["RC-07", "RC-08"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-23", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 21, "valor": 9.0},
+          {"desde": 22, "hasta": 23, "valor": 4.0},
+          {"desde": 24, "hasta": 41, "valor": 9.0},
+          {"produccion": 42, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-23", "acumulado": 30, "regla_acumulado": "RC-07",
+                   "aptitud": "apto", "regla_aptitud": "RC-08"}]
+      }
+    },
+    {
+      "caso_id": "L-16",
+      "titulo": "Acumulado de 31 minutos: no apto",
+      "reglas": ["RC-08"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-24", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 21, "valor": 9.0},
+          {"desde": 22, "hasta": 23, "valor": 4.0},
+          {"desde": 24, "hasta": 42, "valor": 9.0},
+          {"produccion": 43, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-24", "acumulado": 31, "aptitud": "no_apto",
+                   "regla_aptitud": "RC-08"}]
+      }
+    },
+    {
+      "caso_id": "L-17",
+      "titulo": "P-CON con acumulado de 10 minutos exactos: apto. Aisla el valor del tipo",
+      "reglas": ["RC-08"],
+      "envio": {
+        "envio_id": "EN-02",
+        "lotes": [{"lote_id": "LT-25", "tipo": "P-CON", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": -20.0},
+          {"desde": 10, "hasta": 19, "valor": -10.0},
+          {"produccion": 20, "valor": -20.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-25", "acumulado": 10, "aptitud": "apto",
+                   "regla_aptitud": "RC-08"}]
+      }
+    },
+    {
+      "caso_id": "L-18",
+      "titulo": "Excursion abierta con 30 minutos exactos en T_d: RESCATE, aun no supera",
+      "reglas": ["RC-09"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-26", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 45, "valor": 9.0}
+        ]
+      },
+      "decision": 40,
+      "esperado": {
+        "lotes": [{"lote": "LT-26", "acumulado": 30, "clase_accion": "RESCATE",
+                   "regla_clase_accion": "RC-09", "aptitud": "apto"}]
+      }
+    },
+    {
+      "caso_id": "L-19",
+      "titulo": "La misma secuencia un minuto despues: 31 minutos y DISPOSICION",
+      "reglas": ["RC-09"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-26", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 8, "hasta": 9, "valor": 4.0},
+          {"desde": 10, "hasta": 45, "valor": 9.0}
+        ]
+      },
+      "decision": 41,
+      "esperado": {
+        "lotes": [{"lote": "LT-26", "acumulado": 31, "clase_accion": "DISPOSICION",
+                   "regla_clase_accion": "RC-09", "aptitud": "no_apto"}]
+      }
+    },
+    {
+      "caso_id": "L-20",
+      "titulo": "Hueco de 5 minutos exactos: determinante, cabe una excursion que abre justo",
+      "reglas": ["RC-11"],
+      "envio": {
+        "envio_id": "EN-01",
+        "lotes": [{"lote_id": "LT-27", "tipo": "P-REF", "carga": 0}],
+        "lecturas": [
+          {"desde": 0, "hasta": 10, "valor": 4.0},
+          {"desde": 16, "hasta": 20, "valor": 4.0}
+        ]
+      },
+      "esperado": {
+        "lotes": [{"lote": "LT-27", "marca_secuencia": "hueco_determinante",
+                   "regla_marca_secuencia": "RC-11", "provisional": true,
+                   "aptitud": "no_declarable_apto", "regla_aptitud": "RC-11"}]
+      }
+    }
+  ]
+}
