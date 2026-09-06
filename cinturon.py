@@ -397,11 +397,15 @@ def ep1_ep2_banco(contador):
     e = Etapa("EP-1+2", "BANCO Y MUTACION POR REGLA",
               "64 casos · determinismo · 13 piezas × 4 condiciones")
     salida = contador.correr(["ejecutar.py"], tiempo=900)
+    # Se toman las lineas de RESULTADO, no las de leyenda. El banco imprime
+    # primero la explicacion de cada condicion y despues su cifra, asi que
+    # quedarse con la primera coincidencia devuelve el texto y tira el dato --
+    # justo lo contrario de lo que este proyecto publica.
     texto = salida.stdout
     for marca in ("superados ...", "(a)  sensibilidad", "(b)  discriminacion",
                   "(c1) localizacion", "(c2) extension"):
         for linea in texto.splitlines():
-            if marca in linea:
+            if marca in linea and ("/13" in linea or "superados" in linea):
                 e.di("  " + linea.strip())
                 break
     if salida.returncode == 0:
@@ -480,9 +484,13 @@ def ep4_a_ep7_medicion(contador, repeticiones_c1a, repeticiones_c1b,
     if sin_calibracion:
         argumentos.append("--sin-calibracion")
     salida = contador.correr(argumentos, tiempo=7200)
+    vistas = []
     for linea in salida.stdout.splitlines():
         if linea.startswith("VEREDICTO DE LA CORRIDA:") or linea.startswith("  · "):
-            e.di("  " + linea.strip())
+            limpia = linea.strip()
+            if limpia not in vistas:      # la medicion lo imprime arriba y abajo
+                vistas.append(limpia)
+                e.di("  " + limpia)
     if salida.returncode == 0:
         return e.resolver(APROBADO)
     if salida.returncode == 1:
@@ -531,11 +539,14 @@ def main(argv=None):
     partes.add_argument("--repeticiones-c1b", type=int, default=14)
     partes.add_argument("--sin-calibracion", action="store_true",
                         help="DEMOSTRACION DL-10: fuerza un INVALIDO")
-    partes.add_argument("--carpeta", default="evidencia/pl-4/corrida",
+    partes.add_argument("--carpeta", default="evidencia/ultima-corrida",
                         help="carpeta propia de ESTA corrida. Dos corridas no "
                              "comparten carpeta: la evidencia de una sobrescribiria "
                              "la de la otra y la tabla publicada dejaria de "
-                             "corresponder a su artefacto (DL-12)")
+                             "corresponder a su artefacto (DL-12). Por defecto se "
+                             "escribe en `ultima-corrida`, que NO se versiona: la "
+                             "corrida de quien prueba el proyecto no debe caer "
+                             "dentro de la evidencia publicada de un tramo")
     args = partes.parse_args(argv)
 
     carpeta = RAIZ / args.carpeta

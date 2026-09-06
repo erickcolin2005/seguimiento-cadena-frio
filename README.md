@@ -364,10 +364,10 @@ valdría.
 | Etapa | Qué corre | Desenlace | Segundos |
 |---|---|---|---|
 | **EP-0** | ESTATICA · el gate de texto | **APROBADO** | 0.0 |
-| **EP-1+2** | BANCO Y MUTACION POR REGLA | **APROBADO** | 15.9 |
+| **EP-1+2** | BANCO Y MUTACION POR REGLA | **APROBADO** | 15.8 |
 | **EP-3** | PREFLIGHT DE LA MEDICION | **APROBADO** | 0.5 |
-| **EP-4..7** | C1-A · C1-B · CALIBRACION · SEC-5 | **APROBADO** | 230.3 |
-| | **TOTAL** | **APROBADO** | **246.7** |
+| **EP-4..7** | C1-A · C1-B · CALIBRACION · SEC-5 | **APROBADO** | 232.2 |
+| | **TOTAL** | **APROBADO** | **248.6** |
 
 ### Tres desenlaces, no dos
 
@@ -401,7 +401,7 @@ salir distinto.
 
 ### Lo que cuesta, y lo que no se sabe
 
-La corrida completa tarda **246,7 segundos** en esta máquina. **Eso no son minutos
+La corrida completa tarda **248,6 segundos** en esta máquina. **Eso no son minutos
 de un proveedor de CI**: no hay proveedor elegido, y aquí no entra ninguna cifra
 de minutos, ningún precio ni ningún nombre de plan **sin la cita literal de su
 documentación**. En este portafolio ya murió una premisa así, y costó horas.

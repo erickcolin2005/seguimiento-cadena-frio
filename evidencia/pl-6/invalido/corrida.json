@@ -14,7 +14,7 @@
       "motivo": "",
       "nombre": "ESTATICA \u00b7 el gate de texto",
       "procesos": 0,
-      "segundos": 0.0,
+      "segundos": 0.3,
       "veredicto": "APROBADO"
     },
     {
@@ -22,7 +22,7 @@
       "motivo": "",
       "nombre": "BANCO Y MUTACION POR REGLA",
       "procesos": 1,
-      "segundos": 15.0,
+      "segundos": 16.1,
       "veredicto": "APROBADO"
     },
     {
@@ -38,11 +38,11 @@
       "motivo": "\u00b7 MI-3 \u00b7 la corrida no trae calibracion. Sin ella no consta que la tanda entrara en la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO (T-23)",
       "nombre": "C1-A \u00b7 C1-B \u00b7 CALIBRACION \u00b7 SEC-5",
       "procesos": 1,
-      "segundos": 88.4,
+      "segundos": 90.2,
       "veredicto": "MEDICION INVALIDA"
     }
   ],
-  "instante": "2026-09-06T17:54:06+00:00",
+  "instante": "2026-09-06T22:10:35+00:00",
   "motivos": [
     "EP-4..7 \u00b7 \u00b7 MI-3 \u00b7 la corrida no trae calibracion. Sin ella no consta que la tanda entrara en la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO (T-23)"
   ],
@@ -105,6 +105,6 @@
     },
     "completo": true
   },
-  "segundos_total": 104.0,
+  "segundos_total": 107.2,
   "veredicto": "MEDICION INVALIDA"
 }

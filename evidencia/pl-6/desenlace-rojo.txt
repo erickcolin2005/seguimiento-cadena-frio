@@ -3,13 +3,13 @@
 CINTURON DE CALIDAD · ocho etapas, de la mas barata a la mas cara
 ==============================================================================
 Python 3.13.14 · solo biblioteca estandar
-Instante de arranque: 2026-09-06T17:48:15+00:00
+Instante de arranque: 2026-09-06T22:04:39+00:00
 
 ==============================================================================
 EP-0 · ESTATICA · el gate de texto
 ==============================================================================
   CE-5 · digesto del banco · inventario · auto-guardia
-  CE-5 · 8 artefactos publicables revisados (lista DERIVADA, no escrita a mano) · con frase prohibida: ninguno
+  CE-5 · 9 artefactos publicables revisados (lista DERIVADA, no escrita a mano) · con frase prohibida: ninguno
   U-13 · digesto del banco 8829ea9c6300f8cc · referencia 8829ea9c6300f8cc
   U-10 · casos enumerados: 64 · A=19 H=4 L=20 O=8 R=6 X=7
   DL-9 · ficheros de pipeline revisados: cinturon.py, .github/workflows/cinturon.yml

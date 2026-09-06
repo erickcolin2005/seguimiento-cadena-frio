@@ -22,7 +22,7 @@
       "motivo": "",
       "nombre": "BANCO Y MUTACION POR REGLA",
       "procesos": 1,
-      "segundos": 15.9,
+      "segundos": 15.8,
       "veredicto": "APROBADO"
     },
     {
@@ -38,11 +38,11 @@
       "motivo": "",
       "nombre": "C1-A \u00b7 C1-B \u00b7 CALIBRACION \u00b7 SEC-5",
       "procesos": 1,
-      "segundos": 230.3,
+      "segundos": 232.2,
       "veredicto": "APROBADO"
     }
   ],
-  "instante": "2026-09-06T17:52:22+00:00",
+  "instante": "2026-09-06T22:08:48+00:00",
   "motivos": [],
   "muertes_provocadas_por_la_medicion": 168,
   "no_medido": [
@@ -116,6 +116,6 @@
     },
     "completo": true
   },
-  "segundos_total": 246.7,
+  "segundos_total": 248.6,
   "veredicto": "APROBADO"
 }
