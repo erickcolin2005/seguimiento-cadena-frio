@@ -1,0 +1,47 @@
+name: cinturon
+
+# El cinturon entero en cada push. Un solo paso decide el veredicto, y su codigo
+# de salida es el veredicto: exito del CI si y solo si el codigo es 0 exacto.
+#
+# Lo que este fichero NO tiene, y es deliberado:
+#   - ningun reintento automatico del proveedor. FALLO e INVALIDO comparten
+#     color, asi que reintentar por color reintentaria un FALLO valido. La
+#     politica de repeticiones vive dentro del instrumento, que lee su propio
+#     motivo y solo repite las causas no deterministas.
+#   - ningun paso posterior al veredicto que termine en exito incondicional.
+#   - ninguna traduccion del codigo de invalidez a cero.
+#
+# La etapa 0 del cinturon lee ESTE fichero y pone rojo si encuentra cualquiera
+# de esas cosas.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  cinturon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # No hay dependencias que instalar. El proyecto entero es biblioteca
+      # estandar, y esa es una propiedad que el cinturon comprueba.
+
+      - name: El cinturon
+        run: python cinturon.py
+
+      # UNICA excepcion nombrada a la regla de arriba: este paso corre siempre,
+      # a proposito. Lo que garantiza no es que el build pase, sino que la
+      # evidencia se publique TAMBIEN cuando el veredicto es INVALIDO o FALLO.
+      # Se permite en la publicacion de la evidencia; se prohibe en el veredicto.
+      - name: Publicar la evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corrida
+          path: evidencia/

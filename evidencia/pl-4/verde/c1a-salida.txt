@@ -1,0 +1,56 @@
+VEREDICTO C1-A: APROBADO
+==============================================================================
+C1-A · el orden de los eventos de un mismo envio se respeta siempre
+Medido sobre un mecanismo directo. NO sobre ningun otro.
+==============================================================================
+semilla: 20260906 · digesto del guion: fb37658608a61111cd82e8b9cdae96a383057608de8e99f083726109bb251ee1
+envios: 8 · lotes: 10 · lecturas emitidas: 203
+
+-- LOS DOS DENOMINADORES · el de C1-A es el segundo ------------
+  inversiones OBSERVADAS ....... 1248   (pares que llegaron al reves)
+  inversiones DECISIVAS ........ 440   (las que solas cambiarian la conclusion)
+  envios con al menos una decisiva 7   (hacen falta 5)
+  clases cubiertas ............. 5 de 5 (hacen falta 3)
+
+-- INVERSIONES DECISIVAS POR CLASE ------------------------------------------
+  IV-1   RC-08              16
+  IV-2   RC-06/RC-07       405
+  IV-3   RC-09             257
+  IV-4   RC-02             122
+  IV-5   RC-04             122
+  --------------------------------------------------------------------------
+  Una inversion puede caer en varias clases: se cuenta una vez en el
+  total y una vez en cada clase. Por eso la suma por clases (922) puede
+  ser mayor que el total (440). Sumarlas seria inventarse un tercer numero.
+  decisivas que ninguna de las cinco clases nombra: 1 · se declaran
+  en vez de repartirlas: inventarles clase seria peor que decirlo.
+
+-- POR ENVIO ----------------------------------------------------------------
+  ENVIO            LECTURAS  OBSERVADAS   DECISIVAS
+  EN-7C4D-01             24         141           0
+  EN-7C4D-02             26         145          70
+  EN-7C4D-03             26         180          69
+  EN-7C4D-04             24         144          69
+  EN-7C4D-05             27         204          90
+  EN-7C4D-06             27         207         100
+  EN-7C4D-07             25         134           1
+  EN-7C4D-08             24          93          41
+
+-- DIVERGENCIAS CONTRA LA REFERENCIA ----------------------------------------
+  lotes comparados: 10 · campos por lote: 9
+  divergencias: 0
+
+-- CALIBRACION · que la medicion pueda VERSE fallar -------------------------
+  la misma corrida contra un SV-1 mutado para NO reconstruir el orden
+  (trata la posicion de llegada como el instante en que ocurrio)
+  divergencias con el mutante: 18
+  -> la medicion se pone roja: SI
+  Sin esto, un cero de divergencias no distingue «el orden se respeta»
+  de «la medicion no mira».
+
+==============================================================================
+VEREDICTO C1-A: APROBADO
+==============================================================================
+
+Lo que esta corrida NO mide: la mitad de cardinalidad de D2. Aqui no
+muere ningun proceso. Eso es C1-B.

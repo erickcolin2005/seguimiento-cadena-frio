@@ -1,0 +1,54 @@
+{
+  "codigo": 0,
+  "digesto_banco": "8829ea9c6300f8cc249fb0f5b3e08b29f90ccc219069bb706f307a5a11de3aba",
+  "donde_corrio": "win32",
+  "ejecuciones_medicion": 1,
+  "etapas": [
+    {
+      "codigo": "EP-0",
+      "motivo": "",
+      "nombre": "ESTATICA \u00b7 el gate de texto",
+      "procesos": 0,
+      "segundos": 0.0,
+      "veredicto": "APROBADO"
+    },
+    {
+      "codigo": "EP-1+2",
+      "motivo": "",
+      "nombre": "BANCO Y MUTACION POR REGLA",
+      "procesos": 1,
+      "segundos": 15.7,
+      "veredicto": "APROBADO"
+    },
+    {
+      "codigo": "EP-3",
+      "motivo": "",
+      "nombre": "PREFLIGHT DE LA MEDICION",
+      "procesos": 1,
+      "segundos": 0.5,
+      "veredicto": "APROBADO"
+    },
+    {
+      "codigo": "EP-4..7",
+      "motivo": "",
+      "nombre": "C1-A \u00b7 C1-B \u00b7 CALIBRACION \u00b7 SEC-5",
+      "procesos": 1,
+      "segundos": 227.7,
+      "veredicto": "APROBADO"
+    }
+  ],
+  "instante": "2026-09-06T13:46:04+00:00",
+  "motivos": [],
+  "muertes_provocadas_por_la_medicion": 168,
+  "no_medido": [
+    "minutos y limites del proveedor de CI",
+    "memoria y minutos de CPU",
+    "muerte de la maquina",
+    "carga",
+    "concurrencia externa"
+  ],
+  "procesos_directos": 3,
+  "python": "3.13.14",
+  "segundos_total": 244.0,
+  "veredicto": "APROBADO"
+}

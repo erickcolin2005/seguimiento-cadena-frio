@@ -1,0 +1,78 @@
+
+==============================================================================
+CINTURON DE CALIDAD · ocho etapas, de la mas barata a la mas cara
+==============================================================================
+Python 3.13.14 · solo biblioteca estandar
+Instante de arranque: 2026-09-06T13:42:00+00:00
+
+==============================================================================
+EP-0 · ESTATICA · el gate de texto
+==============================================================================
+  CE-5 · digesto del banco · inventario · auto-guardia
+  CE-5 · 5 artefactos publicables revisados, 0 frases prohibidas
+  U-13 · digesto del banco 8829ea9c6300f8cc · referencia 8829ea9c6300f8cc
+  U-10 · casos enumerados: 64 · A=19 H=4 L=20 O=8 R=6 X=7
+  DL-9 · ficheros de pipeline revisados: cinturon.py, .github/workflows/cinturon.yml
+  DL-9 · patrones que anularian el veredicto: ninguno
+  -> APROBADO  (0.0 s · 0 procesos)
+
+==============================================================================
+EP-1+2 · BANCO Y MUTACION POR REGLA
+==============================================================================
+  64 casos · determinismo · 13 piezas × 4 condiciones
+  superados ................... 64
+  (a)  sensibilidad: caen TODOS los casos de la lista de §8 de la pieza
+  (b)  discriminacion: el discriminante cae Y su conclusion con esta
+  (c1) localizacion: todo caso que cambia de VALOR es un caso donde la
+  (c2) extension: ningun valor cambiado lo firma una regla que la
+  -> APROBADO  (15.7 s · 1 procesos)
+
+==============================================================================
+EP-3 · PREFLIGHT DE LA MEDICION
+==============================================================================
+  VB-1 · que los dos mutantes existen y se distinguen
+  VB-1 · codigo 0 · PASA
+  MUT-1 (marca antes de enviar) declarado: si
+  MUT-2 (receptor no idempotente) declarado: si
+  -> APROBADO  (0.5 s · 1 procesos)
+
+==============================================================================
+EP-4..7 · C1-A · C1-B · CALIBRACION · SEC-5
+==============================================================================
+  la medicion completa, con su veredicto DP-02
+  VEREDICTO DE LA CORRIDA: APROBADO
+  VEREDICTO DE LA CORRIDA: APROBADO
+  -> APROBADO  (227.7 s · 1 procesos)
+
+==============================================================================
+CE-2 · LA FACTURA DEL CINTURON
+==============================================================================
+  ETAPA                      SEGUNDOS   PROCESOS
+  --------------------------------------------------------------------------
+  EP-0                            0.0          0
+  EP-1+2                         15.7          1
+  EP-3                            0.5          1
+  EP-4..7                       227.7          1
+  --------------------------------------------------------------------------
+  TOTAL                         244.0          3
+  procesos que la medicion MATA por dentro: 168
+  (el 3 de arriba son los hijos DIRECTOS del cinturon)
+  ejecuciones de la medicion: 1 de 3 permitidas (U-06)
+
+  Lo que este numero NO es: minutos de un proveedor de CI. Aqui no hay
+  proveedor elegido, y este proyecto no admite ninguna cifra de minutos,
+  ningun precio y ningun nombre de plan sin la cita literal de su
+  documentacion de limites. Lo medido es tiempo de pared y procesos
+  arrancados EN ESTA MAQUINA. [NV] el limite del proveedor.
+  Memoria y minutos de CPU: NO MEDIDOS. La biblioteca estandar no los
+  da de forma portable en esta plataforma y no se instala nada (CE-3).
+
+==============================================================================
+VEREDICTO DEL CINTURON: APROBADO  (codigo 0)
+==============================================================================
+
+  Artefacto crudo: evidencia\pl-4\verde\corrida.json
+  La tabla publicable se genera DESDE ese artefacto, nunca a mano: una
+  tabla tecleada es una tabla en la que alguien pudo elegir que filas
+  copiaba.
+VERDE EXIT=0

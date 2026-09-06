@@ -346,6 +346,85 @@ cosa, y otro dejaba una de las versiones rotas **sin romper, en silencio**.
 
 ---
 
+## 4e · Todo lo anterior, en cada push
+
+```
+python cinturon.py
+```
+
+Ocho etapas **de la más barata a la más cara**. La primera no arranca un solo
+proceso y aun así puede poner rojo el push entero; la última mata ciento sesenta
+y ocho. Esta tabla **no está tecleada**: se genera desde el artefacto crudo de la
+corrida con `python tabla.py`, y si no se pudiera regenerar, la publicación no
+valdría.
+
+| Etapa | Qué corre | Desenlace | Segundos |
+|---|---|---|---|
+| **EP-0** | ESTATICA · el gate de texto | **APROBADO** | 0.0 |
+| **EP-1+2** | BANCO Y MUTACION POR REGLA | **APROBADO** | 15.7 |
+| **EP-3** | PREFLIGHT DE LA MEDICION | **APROBADO** | 0.5 |
+| **EP-4..7** | C1-A · C1-B · CALIBRACION · SEC-5 | **APROBADO** | 227.7 |
+| | **TOTAL** | **APROBADO** | **244.0** |
+
+**Código de salida: 0.** Corrida del 2026-09-06T13:46:04+00:00, en `win32`, con Python 3.13.14.
+Digesto del banco: `8829ea9c6300f8cc`.
+
+Procesos arrancados directamente por el cinturón: **3**.
+Procesos que la medición mata por dentro: **168**.
+
+**Lo que esta corrida NO midió**, declarado en el propio artefacto:
+- minutos y limites del proveedor de CI
+- memoria y minutos de CPU
+- muerte de la maquina
+- carga
+- concurrencia externa
+
+### Tres desenlaces, no dos
+
+El cinturón no devuelve «bien o mal». Devuelve **APROBADO**, **FALLO** o
+**MEDICIÓN INVÁLIDA**, y **cualquier código que el proceso no haya elegido cuenta
+como inválido**. No es cosmética: si «fallo» fuera el código 1, una excepción del
+instrumento se leería como *«el sistema perdió una acción»* — y esas son dos cosas
+distintas. Para un CI que solo entiende éxito y fallo, **éxito es el código 0
+exacto**; los otros dos son rojo, y la asimetría es deliberada.
+
+**Los tres están demostrados, no afirmados**, y se vuelven a demostrar cada vez
+que el pipeline cambia:
+
+| Desenlace | Cómo se provocó | Código |
+|---|---|---|
+| **APROBADO** | La corrida normal | 0 |
+| **FALLO** | Se metió una anulación de veredicto en el fichero del CI | 20 |
+| **MEDICIÓN INVÁLIDA** | Se omitió la calibración, y solo eso | 30 |
+
+El segundo lo cazó **la etapa que se vigila a sí misma**: el cinturón lee su
+propio fichero y el del CI, y se pone rojo si encuentra cualquiera de las formas
+conocidas de anular un veredicto. Tardó **0,0 segundos y 0 procesos**.
+
+### Lo que no se reintenta, y por qué
+
+**Un fallo válido no se repite jamás; repetir un rojo hasta que salga verde es
+lavarlo.** Como fallo e inválido comparten color, un reintento automático del
+proveedor reintentaría un fallo válido — así que aquí no hay ninguno. Repetir es
+decisión del instrumento, que lee **su propio motivo** y solo repite lo que puede
+salir distinto.
+
+### Lo que cuesta, y lo que no se sabe
+
+La corrida completa tarda **244,0 segundos** en esta máquina. **Eso no son minutos
+de un proveedor de CI**: no hay proveedor elegido, y aquí no entra ninguna cifra
+de minutos, ningún precio ni ningún nombre de plan **sin la cita literal de su
+documentación**. En este portafolio ya murió una premisa así, y costó horas.
+
+Así que la pregunta *«¿cabe en el plan gratuito?»* está **sin responder a
+propósito** `[NV]`. Lo que sí está escrito es qué se recortaría primero si no
+cupiera — y **ni C1 ni su calibración están en esa lista**.
+
+El detalle está en **`NOTAS-PL4.md`**, con dos defectos más que la propia corrida
+destapó.
+
+---
+
 ## 5 · Qué leer, y en qué orden
 
 1. **Este README** — el problema y la afirmación.
@@ -362,11 +441,12 @@ cosa, y otro dejaba una de las versiones rotas **sin romper, en silencio**.
    servicios, y las cuatro cosas que se declaran en vez de darse por cubiertas.
 6. **`NOTAS-PL3.md`** — cómo se midió §2, por qué el cero significa algo, y los
    dos defectos del instrumento que se cazaron antes de publicar nada.
-7. **`evidencia/pl-3/`** — la salida real de las corridas, incluidas **las dos que
-   salieron inválidas a propósito**.
+7. **`NOTAS-PL4.md`** — el cinturón, sus tres desenlaces demostrados y su factura.
+8. **`evidencia/`** — la salida real de las corridas, incluidas **las que salieron
+   inválidas y roja a propósito**.
 
-Y tres cosas que ejecutar: `python ejecutar.py`, `python comprobar.py` y
-`python veredicto.py`. Ninguna deja nada instalado.
+Y una sola cosa que ejecutar si solo se va a ejecutar una: `python cinturon.py`,
+que corre todo lo demás en orden. Ninguna deja nada instalado.
 
 ---
 
