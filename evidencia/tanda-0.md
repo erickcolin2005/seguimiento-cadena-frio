@@ -242,3 +242,61 @@ no las contesta: siguen esperando a alguien que no sea el autor.
 medirse, y esta vez con el agravante de que ya no es barato descubrir que el
 encuadre no se entiende. **No bloquea nada — y esa es exactamente la razón por la
 que lleva dos tandas sin hacerse.**
+
+---
+
+## 9 · Tanda 2 · sobre el proyecto cerrado y publicado — **PENDIENTE**
+
+> **Desenlace: todavía ninguno.** A diferencia de las dos anteriores, esta no se
+> declara NO MEDIDA: se declara **pendiente**, porque por primera vez el
+> obstáculo concreto que la impedía ha desaparecido.
+
+**Qué cambió.** Hasta ahora, pedirle a alguien que leyera esto significaba
+mandarle una carpeta. **Ahora hay un enlace.** El repositorio está publicado, y
+el texto que hay que leer se abre en el navegador sin instalar nada ni pedir
+permiso a nadie.
+
+**Y hay más que atacar que en las dos tandas anteriores:** la afirmación está
+medida sobre **dos transportes distintos** y coincide campo a campo, hay una
+corrida publicada que salió **inválida a propósito**, y una condición que estuvo
+ocho tramos prohibiendo una frase y ahora la permite **solo con su evidencia
+detrás**. Todo eso es material discutible, que es lo que un lector externo
+necesita para poder decir algo que no sea «vale».
+
+### El mensaje, escrito para no cebar al lector
+
+La condición 3 de §5 prohíbe explicar antes de que lea. Por eso el mensaje **no
+dice de qué va**, no nombra la tecnología y no pide una valoración. Se copia tal
+cual:
+
+> Oye, ¿me haces un favor de cinco minutos? Léete esto por encima y dime **qué
+> problema crees que resuelve**. No te cuento nada antes a propósito — lo que
+> quiero saber es qué se entiende sin que yo esté delante.
+>
+> `<enlace al repositorio>`
+>
+> Y si te apetece rematar: ¿te parece un problema difícil, o te parece lo que
+> haría por defecto cualquier herramienta que ya conoces? ¿Y hay alguna frase
+> ahí que no te creas?
+
+**Las tres preguntas son las de §2, sin cambiar.** No se le enseña la medición,
+no se le explica el dominio y no se le dice qué se espera oír.
+
+### Qué hacer con la respuesta
+
+1. **Se pega aquí tal cual**, como tanda 2, incluidas las partes que dejan mal al
+   planteamiento. Una transcripción sin nada incómodo probablemente se editó.
+2. **Las secciones 0, 1 y 8 de este documento no se tocan.** Siguen diciendo NO
+   MEDIDA, porque eso es lo que pasó entonces.
+3. **Se dice qué mide esta tanda y qué no.** Mide si el proyecto **terminado**
+   se entiende. **No** mide si el planteamiento aguantaba antes de costar nada:
+   esa pregunta lleva dos tandas sin poder contestarse y ya no se recupera.
+4. **Si el lector dice que el problema le parece trivial**, eso no es un fracaso
+   de la tanda: es su resultado, y el más informativo de los posibles. Cambiaría
+   el problema con nombre, y con él lo que este proyecto afirma tener de mérito.
+
+### Lo que sigue sin cerrarse
+
+**Quién es el lector.** Sigue siendo la decisión abierta más barata del
+proyecto, y la que más veces se ha dejado sin cerrar `[V — lleva dos de dos]`.
+Publicar el repositorio **quita la excusa logística; no elige a la persona.**
