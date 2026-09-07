@@ -707,11 +707,21 @@ def main(argv=None):
     print("  ejecuciones de la medicion: %d de %d permitidas (U-06)"
           % (ejecuciones_hechas, EJECUCIONES))
     print()
-    print("  Lo que este numero NO es: minutos de un proveedor de CI. Aqui no hay")
-    print("  proveedor elegido, y este proyecto no admite ninguna cifra de minutos,")
-    print("  ningun precio y ningun nombre de plan sin la cita literal de su")
-    print("  documentacion de limites. Lo medido es tiempo de pared y procesos")
-    print("  arrancados EN ESTA MAQUINA. [NV] el limite del proveedor.")
+    # CE-2 · durante siete tramos esta nota decia que no habia proveedor elegido
+    # y que aqui no entraba ninguna cifra sin la cita literal de su
+    # documentacion. Ya hay proveedor y ya hay cita, asi que la nota cambia --
+    # pero la disciplina no: el numero de arriba sigue siendo tiempo de pared de
+    # ESTA maquina, y no son minutos facturables de nadie.
+    print("  Lo que este numero NO es: minutos facturables de un proveedor. Es")
+    print("  tiempo de pared y procesos arrancados EN ESTA MAQUINA, y las dos")
+    print("  cifras se publican etiquetadas y nunca promediadas.")
+    print("  El limite del proveedor, citado literal de su documentacion:")
+    print("    «Each job in a workflow can run for up to 6 hours of execution")
+    print("     time.» -- atribuido a All GitHub-hosted runners")
+    print("    «GitHub Actions usage is free for standard GitHub-hosted runners")
+    print("     in public repositories.»")
+    print("    «These limits are subject to change.»")
+    print("  Detalle y margen medido: evidencia/ce2-el-cinturon-en-ci.md")
     print("  Memoria y minutos de CPU: NO MEDIDOS. La biblioteca estandar no los")
     print("  da de forma portable en esta plataforma y no se instala nada para")
     print("  medirlos (CE-3).")

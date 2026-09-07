@@ -501,14 +501,39 @@ salir distinto.
 
 ### Lo que cuesta, y lo que no se sabe
 
-La corrida completa tarda **248,6 segundos** en esta máquina. **Eso no son minutos
-de un proveedor de CI**: no hay proveedor elegido, y aquí no entra ninguna cifra
-de minutos, ningún precio ni ningún nombre de plan **sin la cita literal de su
-documentación**. En este portafolio ya murió una premisa así, y costó horas.
+Durante siete tramos esta sección dijo que la pregunta *«¿cabe en el plan
+gratuito?»* estaba **sin responder a propósito**, porque no había proveedor
+elegido y aquí no entra ninguna cifra de minutos, ningún precio ni ningún nombre
+de plan **sin la cita literal de su documentación**. En este portafolio ya murió
+una premisa así, y costó horas.
 
-Así que la pregunta *«¿cabe en el plan gratuito?»* está **sin responder a
-propósito** `[NV]`. Lo que sí está escrito es qué se recortaría primero si no
-cupiera — y **ni C1 ni su calibración están en esa lista**.
+**Ya está respondida, y con las dos mitades que hacían falta:**
+
+| | |
+|---|---|
+| **Límite citado** | *«Each job in a workflow can run for up to 6 hours of execution time»* — atribuido a **All GitHub-hosted runners** |
+| **Medido en la máquina del proveedor** | **76 s** · corrida verde · commit `d93d88c` |
+| **Margen consumido** | **0,35 %** |
+| **Coste** | Ninguno · *«GitHub Actions usage is free for standard GitHub-hosted runners in public repositories»* |
+
+**Cabe, y no por suerte: cabe porque el repositorio es público.** En uno privado
+la respuesta se mediría contra una cuota de minutos y podría ser otra.
+
+Y las dos duraciones van **etiquetadas, nunca promediadas**: **221,3 s** en la
+máquina del autor (Windows) y **76 s** en la del proveedor (Linux). El CI es casi
+3× más rápido y **eso no es una mejora del proyecto**: el cinturón arranca 168
+procesos, y crear procesos cuesta muy distinto en cada sistema. Quedarse con la
+cifra menor sería publicar una mejora que nadie midió.
+
+**Lo que ese CI encontró en su primera corrida, en nueve segundos:** que el
+digesto del banco vigilaba el checkout y no el banco — un fichero con CRLF y
+siete con LF hacían imposible que Windows y Linux coincidieran. **Ocho tramos de
+verde local no lo vieron**, porque ninguno corrió fuera de una sola máquina. El
+detalle está en `evidencia/ce2-el-cinturon-en-ci.md`.
+
+**Lo que sigue sin correr en CI:** la medición sobre el otro transporte. Necesita
+un intermediario en contenedores que ese trabajo no levanta, y se dice en vez de
+dejar que parezca cubierto.
 
 El detalle está en **`NOTAS-PL4.md`**, con dos defectos más que la propia corrida
 destapó.
