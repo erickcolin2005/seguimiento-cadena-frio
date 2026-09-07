@@ -46,7 +46,8 @@ def _ahora():
 
 class Servicio:
     def __init__(self, con, guion, corrida_id, url_sv2, reconstruye_orden=True,
-                 marca_antes_de_enviar=False, clase_transporte="directo"):
+                 marca_antes_de_enviar=False, clase_transporte="directo",
+                 clase_entrada="http", grupo_entrada=None):
         self.con = con
         # El mutante de C1-A. Apagarlo hace que SV-1 trate la posicion de LLEGADA
         # como si fuera el instante en que ocurrio -- que es lo que hace un
@@ -64,6 +65,15 @@ class Servicio:
         # devuelven un desenlace. La garantia no esta aqui ni esta ahi dentro:
         # esta en la bandeja y en la clave de la terna.
         self.transporte = transporte.construir(clase_transporte, url_sv2)
+        # La otra mitad de la costura: SV-1 tampoco sabe POR DONDE le llegan las
+        # lecturas. La idempotencia de la ingesta es por (envio, secuencia) y
+        # vive aqui, no en el adaptador -- por eso reconsumir no crea nada.
+        # El grupo lleva el id de la corrida: al revivir tras una muerte, SV-1
+        # vuelve al MISMO grupo y retoma donde lo dejo -- que es lo que hay que
+        # medir--, mientras que dos corridas distintas nunca comparten avance.
+        self.entrada = transporte.construir_entrada(
+            clase_entrada, tema=transporte.TEMA_LECTURAS,
+            grupo=grupo_entrada or ("p1.sv1.%s" % corrida_id))
         self.sw = Interruptores()
         self.lotes_por_envio = {e["envio_id"]: e["lotes"] for e in guion["envios"]}
         self._sembrar_catalogo()
@@ -371,7 +381,13 @@ class Servicio:
                 sys.stdout.flush()
                 os._exit(9)
             desenlace = respuesta.get("desenlace")
-            if desenlace in (transporte.REGISTRADA, transporte.YA_REGISTRADA):
+            # Los dos primeros los dice el receptor; el tercero lo dice el
+            # transporte sobre si mismo, y solo aparece cuando el transporte es
+            # asincrono y no hay veredicto que esperar. Los tres significan lo
+            # mismo para la bandeja: esta entrada ya no es asunto suyo. El
+            # efecto exactamente uno lo sigue poniendo la terna en SV-2.
+            if desenlace in (transporte.REGISTRADA, transporte.YA_REGISTRADA,
+                             transporte.ENTREGADA_AL_TRANSPORTE):
                 if not self.marca_antes_de_enviar:
                     self._marcar_entregada(fila)
                 entregadas += 1
@@ -426,12 +442,25 @@ class Servicio:
             return 200, {"servicio": "SV-1", "papel": "nucleo de reglas",
                          "estado": "vivo", "corrida_id": self.corrida_id,
                          "digesto_guion": modulo_guion.digesto(self.guion),
-                         "transporte": self.transporte.describir()}
+                         "transporte": self.transporte.describir(),
+                         "entrada": self.entrada.describir(),
+                         # Con una entrada asincrona, quien emite no sabe cuando
+                         # termino de ingerirse. Este numero es lo unico que se
+                         # lo dice, y por eso lo publica el propio nucleo.
+                         "lecturas_ingeridas": self.con.execute(
+                             "SELECT count(*) AS n FROM lectura WHERE corrida_id = ?",
+                             (self.corrida_id,)).fetchone()["n"]}
         if metodo == "GET" and camino == "/bandeja":
             return self.bandeja()
         if metodo == "GET" and camino == "/conclusiones":
             return self.conclusiones()
         if metodo == "POST" and camino == "/lecturas":
+            if not self.entrada.admite_http:
+                # La ingesta va por otro transporte y esta ruta esta cerrada a
+                # proposito: si siguiera abierta, una lectura podria entrar por
+                # el camino viejo mientras la corrida dice medir sobre otro.
+                return 409, {"desenlace": "ingesta_no_es_por_http",
+                             "entrada": self.entrada.nombre}
             return self.recibir_lectura(cuerpo)
         if metodo == "POST" and camino == "/drenar":
             cuerpo = cuerpo or {}
@@ -452,6 +481,10 @@ def main(argv=None):
     partes.add_argument("--repeticiones", type=int, default=1)
     partes.add_argument("--transporte", default="directo",
                         help="que adaptador de transporte usa el drenaje")
+    partes.add_argument("--entrada", default="http",
+                        help="que adaptador trae las lecturas a la ingesta")
+    partes.add_argument("--grupo-entrada", default=None,
+                        help="grupo de consumo; por omision lleva el id de la corrida")
     partes.add_argument("--marca-antes-de-enviar", action="store_true",
                         help="MUTANTE: marca la entrada entregada antes de "
                              "entregarla. Para la calibracion de C1-B.")
@@ -471,18 +504,38 @@ def main(argv=None):
     servicio = Servicio(con, g, args.corrida, args.sv2,
                         reconstruye_orden=not args.sin_reconstruccion_de_orden,
                         marca_antes_de_enviar=args.marca_antes_de_enviar,
-                        clase_transporte=args.transporte)
+                        clase_transporte=args.transporte,
+                        clase_entrada=args.entrada,
+                        grupo_entrada=args.grupo_entrada)
     if args.marca_antes_de_enviar:
         print("SV-1 ARRANCA MUTADO: marca antes de enviar", flush=True)
     if args.sin_reconstruccion_de_orden:
         print("SV-1 ARRANCA MUTADO: sin reconstruccion de orden", flush=True)
+    servicio.entrada.arrancar(servicio.recibir_lectura)
     servidor = protocolo.crear_servidor(args.puerto, servicio.manejar)
     print("SV-1 escuchando en %s" % protocolo.base(args.puerto), flush=True)
     try:
-        servidor.serve_forever()
+        if servicio.entrada.necesita_bombeo:
+            # Atender y consumir en el MISMO hilo, alternando. No es una
+            # optimizacion: es lo que mantiene el servicio secuencial. Con el
+            # consumidor en un hilo aparte habria dos hilos sobre el mismo
+            # almacen, el camino dejaria de ser reproducible y las carreras que
+            # salieran se leerian como fallos del sistema siendo del instrumento.
+            servidor.timeout = 0.02
+            while True:
+                servidor.handle_request()
+                servicio.entrada.bombear()
+        else:
+            servidor.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
+        # El orden importa y no es simetrico: primero se deja de traer trabajo
+        # nuevo, y solo despues se cierra el almacen. Al reves, una lectura en
+        # vuelo se encontraria la conexion cerrada. Nada de esto salva a la
+        # muerte no interceptable, que por definicion no ejecuta este bloque:
+        # de esa se ocupa la bandeja, no un cierre ordenado.
+        servicio.entrada.parar()
         con.close()
     return 0
 

@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 corrida/
 evidencia/ultima-corrida/
+# El transporte por eventos necesita un cliente que la biblioteca estandar no
+# trae. Vive aqui y no en la maquina: el transporte directo -- que es el
+# predeterminado -- sigue sin instalar nada, y esto se borra con rm.
+.venv-eventos/

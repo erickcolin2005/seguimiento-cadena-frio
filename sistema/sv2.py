@@ -36,7 +36,7 @@ import sqlite3
 import sys
 from datetime import datetime, timezone
 
-from . import almacen, protocolo
+from . import almacen, protocolo, transporte
 
 # La maquina de custodia, monotona y sin un solo umbral. El orden es el que
 # manda: nunca se retrocede.
@@ -53,8 +53,14 @@ def _ahora():
 
 
 class Servicio:
-    def __init__(self, con):
+    def __init__(self, con, clase_entrada="http", grupo_entrada=None):
         self.con = con
+        # El testigo tambien consume cuando el transporte es por eventos: si la
+        # accion se produce a un tema, alguien tiene que sacarla de ahi. La
+        # idempotencia sigue viviendo aqui -- en la terna--, no en el adaptador.
+        self.entrada = transporte.construir_entrada(
+            clase_entrada, tema=transporte.TEMA_ACCIONES,
+            grupo=grupo_entrada or "p1.sv2")
 
     # --- siembra -------------------------------------------------------------
 
@@ -222,20 +228,40 @@ def main(argv=None):
     partes.add_argument("--receptor-no-idempotente", action="store_true",
                         help="MUTANTE: la terna deja de ser clave. Existe para la "
                              "calibracion de C1-B, no para operar.")
+    partes.add_argument("--entrada", default="http",
+                        help="que adaptador trae las acciones al receptor")
+    partes.add_argument("--grupo-entrada", default=None,
+                        help="grupo de consumo del receptor")
     args = partes.parse_args(argv)
 
     con = almacen.abrir_al2(almacen.ruta_al2(args.directorio),
                             idempotente=not args.receptor_no_idempotente)
     if args.receptor_no_idempotente:
         print("SV-2 ARRANCA MUTADO: receptor no idempotente", flush=True)
-    servicio = Servicio(con)
+    servicio = Servicio(con, clase_entrada=args.entrada,
+                        grupo_entrada=args.grupo_entrada)
+    # La ruta /acciones sigue ABIERTA aunque la entrada sea por eventos, y la
+    # asimetria con SV-1 es deliberada: alli cerrarla evita una medicion
+    # silenciosamente falsa -- entrada por eventos con emisor por HTTP seguiria
+    # funcionando y mentiria--. Aqui no evita nada parecido: si el transporte y
+    # la entrada no casaran, nadie consumiria el tema y el recuento saldria
+    # cero, que es un fallo a gritos. Y cerrarla romperia las sondas que
+    # comprueban el vocabulario del receptor posteando directo.
+    servicio.entrada.arrancar(servicio.recibir_accion)
     servidor = protocolo.crear_servidor(args.puerto, servicio.manejar)
     print("SV-2 escuchando en %s" % protocolo.base(args.puerto), flush=True)
     try:
-        servidor.serve_forever()
+        if servicio.entrada.necesita_bombeo:
+            servidor.timeout = 0.02
+            while True:
+                servidor.handle_request()
+                servicio.entrada.bombear()
+        else:
+            servidor.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
+        servicio.entrada.parar()
         con.close()
     return 0
 

@@ -25,7 +25,7 @@ import sys
 import time
 from pathlib import Path
 
-from sistema import almacen, guion as modulo_guion, protocolo
+from sistema import almacen, guion as modulo_guion, protocolo, transporte
 
 RAIZ = Path(__file__).resolve().parent
 SEMILLA_POR_DEFECTO = 20260906
@@ -41,7 +41,13 @@ class Orquesta:
 
     def __init__(self, directorio, semilla=SEMILLA_POR_DEFECTO, corrida=None,
                  silencioso=False, repeticiones=1, sin_orden=False,
-                 marca_antes=False, receptor_no_idempotente=False):
+                 marca_antes=False, receptor_no_idempotente=False,
+                 modo_transporte="directo"):
+        # «directo» o «eventos». Elige los TRES adaptadores a la vez -- emisor,
+        # entrada y salida-- a proposito: dejarlos elegir por separado permitiria
+        # una corrida que emite por un camino y escucha por otro, y esa corrida
+        # mediria algo que nadie pidio medir.
+        self.modo_transporte = modo_transporte
         self.directorio = Path(directorio)
         self.semilla = semilla
         self.repeticiones = repeticiones
@@ -60,6 +66,12 @@ class Orquesta:
         self.puerto_sv2 = None
         self.proceso_sv1 = None
         self.proceso_sv2 = None
+
+    @property
+    def clase_entrada(self):
+        """El modo se llama «directo», pero la entrada que le corresponde se
+        llama «http»: el nombre dice POR DONDE entra, no que modo la eligio."""
+        return "eventos" if self.modo_transporte == "eventos" else "http"
 
     # --- ciclo de vida -------------------------------------------------------
 
@@ -91,9 +103,16 @@ class Orquesta:
             text=True)
 
     def arrancar(self):
+        if self.modo_transporte == "eventos":
+            # Los temas son estado, igual que los almacenes, y la corrida
+            # empieza con ellos vacios. Si no, esta corrida ingeriria lo que
+            # dejo la anterior.
+            transporte.reiniciar_temas()
         self.puerto_sv2 = protocolo.puerto_libre()
         self.proceso_sv2 = self._lanzar("sistema.sv2", [
-            "--puerto", str(self.puerto_sv2), "--directorio", str(self.directorio)]
+            "--puerto", str(self.puerto_sv2), "--directorio", str(self.directorio),
+            "--entrada", self.clase_entrada,
+            "--grupo-entrada", "p1.sv2.%s" % self.corrida_id]
             + (["--receptor-no-idempotente"] if self.receptor_no_idempotente else []))
         if protocolo.esperar_vivo(self.url_sv2) is None:
             raise RuntimeError("SV-2 no respondio a /salud: %s" % self._diagnostico(
@@ -113,7 +132,14 @@ class Orquesta:
             "--puerto", str(self.puerto_sv1), "--directorio", str(self.directorio),
             "--semilla", str(self.semilla), "--digesto", self.digesto,
             "--corrida", self.corrida_id, "--sv2", self.url_sv2,
-            "--repeticiones", str(self.repeticiones)]
+            "--repeticiones", str(self.repeticiones),
+            "--transporte", self.modo_transporte,
+            "--entrada", self.clase_entrada,
+            # El grupo lleva el id de la corrida y NO el del proceso: al revivir
+            # tras una muerte, SV-1 vuelve al mismo grupo y retoma el avance que
+            # dejo sin confirmar. Un grupo nuevo por arranque empezaria de cero
+            # y reingeriria la corrida entera en cada muerte.
+            "--grupo-entrada", "p1.sv1.%s" % self.corrida_id]
             + (["--sin-reconstruccion-de-orden"] if self.sin_orden else [])
             + (["--marca-antes-de-enviar"] if self.marca_antes else []))
         if protocolo.esperar_vivo(self.url_sv1) is None:
@@ -182,17 +208,32 @@ class Orquesta:
 
     def emitir(self):
         """EM · emite las lecturas del guion a SV-1, en orden de produccion."""
+        emisor = transporte.construir_emisor(self.clase_entrada, self.url_sv1)
         enviadas, respuestas = 0, []
-        for envio in self.guion["envios"]:
-            for lectura in sorted(envio["lecturas"], key=lambda l: l["produccion_min"]):
-                codigo, cuerpo = protocolo.pedir(self.url_sv1, "/lecturas", {
-                    "corrida_id": self.corrida_id,
-                    "envio_id": envio["envio_id"],
-                    "secuencia": lectura["secuencia"],
-                    "produccion_min": lectura["produccion_min"],
-                    "valor_c": lectura["valor_c"]})
-                enviadas += 1
-                respuestas.append((codigo, cuerpo))
+        try:
+            for envio in self.guion["envios"]:
+                for lectura in sorted(envio["lecturas"],
+                                      key=lambda l: l["produccion_min"]):
+                    codigo, cuerpo = emisor.enviar({
+                        "corrida_id": self.corrida_id,
+                        "envio_id": envio["envio_id"],
+                        "secuencia": lectura["secuencia"],
+                        "produccion_min": lectura["produccion_min"],
+                        "valor_c": lectura["valor_c"]})
+                    enviadas += 1
+                    respuestas.append((codigo, cuerpo))
+        finally:
+            emisor.cerrar()
+        if not emisor.entrega_veredicto:
+            # Con un emisor asincrono, volver de `enviar` NO significa que este
+            # ingerida. Preguntar ahora por las conclusiones mediria un prefijo
+            # de la corrida y saldria verde o rojo por el motivo equivocado.
+            llego, cuantas = transporte.esperar_ingesta(self.url_sv1, enviadas)
+            if not llego:
+                raise RuntimeError(
+                    "la ingesta no alcanzo las %d lecturas (llego a %d). No es "
+                    "un fallo del sistema: la corrida no se pudo completar y "
+                    "eso se declara MEDICION INVALIDA." % (enviadas, cuantas))
         return enviadas, respuestas
 
 
@@ -206,6 +247,11 @@ def main(argv=None):
                         help="borra el directorio de corrida antes de empezar")
     partes.add_argument("--y-salir", action="store_true",
                         help="arranca, informa y para; no se queda esperando")
+    partes.add_argument("--transporte", default="directo",
+                        choices=("directo", "eventos"),
+                        help="`directo` cumple RNF-06: sin red, sin imagen, sin "
+                             "credencial y sin instalar nada. `eventos` necesita "
+                             "el intermediario levantado")
     args = partes.parse_args(argv)
 
     directorio = Path(args.directorio)
@@ -220,7 +266,8 @@ def main(argv=None):
     print("docker en el PATH: %s  (no se usa: el arranque no depende de el)"
           % ("si" if shutil.which("docker") else "no"))
 
-    orquesta = Orquesta(directorio, args.semilla)
+    orquesta = Orquesta(directorio, args.semilla,
+                        modo_transporte=args.transporte)
     conteos = orquesta.crear_almacenes()
     vacios = all(n == 0 for a in conteos.values() for n in a.values())
     print()

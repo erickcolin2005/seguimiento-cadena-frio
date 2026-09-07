@@ -119,14 +119,15 @@ def cruzar_b2(orquesta, sv1_vivo):
                         "en el libro" % len(bandeja["entradas"]))
 
 
-def demostrar_sec5(semilla):
+def demostrar_sec5(semilla, modo_transporte="directo"):
     """Levanta una corrida, la drena, MATA SV-1 y emite el veredicto sin el.
 
     Devuelve un diccionario con el recuento obtenido con SV-1 detenido y el
     estado de B-2 en las dos situaciones.
     """
     carpeta = Path(tempfile.mkdtemp(prefix="sec5-"))
-    o = Orquesta(carpeta, semilla, silencioso=True, repeticiones=1)
+    o = Orquesta(carpeta, semilla, silencioso=True, repeticiones=1,
+                 modo_transporte=modo_transporte)
     try:
         o.crear_almacenes()
         o.arrancar()
@@ -173,6 +174,9 @@ def main(argv=None):
                              "MEDICION INVALIDA, jamas APROBADO (T-23).")
     partes.add_argument("--evidencia", default=None,
                         help="carpeta donde guardar la salida de esta corrida")
+    partes.add_argument("--transporte", default="directo",
+                        choices=("directo", "eventos"),
+                        help="sobre que transporte corre la medicion entera")
     args = partes.parse_args(argv)
 
     trabajo = Path(tempfile.mkdtemp(prefix="veredicto-"))
@@ -181,19 +185,21 @@ def main(argv=None):
 
     c1a, salida_a = medir("medir_c1a.py",
                           ["--semilla", str(args.semilla),
-                           "--repeticiones", str(args.repeticiones_c1a)],
+                           "--repeticiones", str(args.repeticiones_c1a),
+                           "--transporte", args.transporte],
                           trabajo / "c1a.json")
     print("  C1-A: %s" % (c1a["veredicto"] if c1a else "NO PRODUJO RESUMEN"),
           flush=True)
     c1b, salida_b = medir("medir_c1b.py",
                           ["--semilla", str(args.semilla),
-                           "--repeticiones", str(args.repeticiones_c1b)]
+                           "--repeticiones", str(args.repeticiones_c1b),
+                           "--transporte", args.transporte]
                           + (["--sin-calibracion"] if args.sin_calibracion else []),
                           trabajo / "c1b.json")
     print("  C1-B: %s" % (c1b["veredicto"] if c1b else "NO PRODUJO RESUMEN"),
           flush=True)
     print("  SEC-5: deteniendo SV-1 y pidiendo el veredicto sin el...", flush=True)
-    sec5 = demostrar_sec5(args.semilla)
+    sec5 = demostrar_sec5(args.semilla, args.transporte)
 
     faltas = []
     if c1a is None or c1b is None:

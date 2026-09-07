@@ -42,7 +42,7 @@ import tempfile
 from pathlib import Path
 
 from levantar import Orquesta, SEMILLA_POR_DEFECTO
-from sistema import desorden, protocolo, referencia
+from sistema import desorden, protocolo, referencia, transporte
 
 ANCHO = 78
 
@@ -98,14 +98,28 @@ def emitir_desordenado(orquesta, ordenes, semilla):
         punteros[elegido] += 1
         entrelazada.append((elegido, lectura))
 
+    emisor = transporte.construir_emisor(orquesta.clase_entrada, orquesta.url_sv1)
     enviadas = 0
-    for envio_id, lectura in entrelazada:
-        protocolo.pedir(orquesta.url_sv1, "/lecturas", {
-            "corrida_id": orquesta.corrida_id, "envio_id": envio_id,
-            "secuencia": lectura["secuencia"],
-            "produccion_min": lectura["produccion_min"],
-            "valor_c": lectura["valor_c"]})
-        enviadas += 1
+    try:
+        for envio_id, lectura in entrelazada:
+            emisor.enviar({
+                "corrida_id": orquesta.corrida_id, "envio_id": envio_id,
+                "secuencia": lectura["secuencia"],
+                "produccion_min": lectura["produccion_min"],
+                "valor_c": lectura["valor_c"]})
+            enviadas += 1
+    finally:
+        emisor.cerrar()
+    if not emisor.entrega_veredicto:
+        # Sin esto, C1-A compararia las conclusiones contra un prefijo de las
+        # lecturas y contaria divergencias que solo dicen «todavia no habia
+        # llegado». Seria el instrumento midiendose a si mismo.
+        llego, cuantas = transporte.esperar_ingesta(orquesta.url_sv1, enviadas)
+        if not llego:
+            raise RuntimeError(
+                "la ingesta no alcanzo las %d lecturas (llego a %d). MEDICION "
+                "INVALIDA: no es que el sistema concluyera mal, es que la "
+                "corrida no se completo." % (enviadas, cuantas))
     return enviadas
 
 
@@ -135,11 +149,15 @@ def main(argv=None):
                         help="vueltas a la baraja de perfiles · 4 envios cada una")
     partes.add_argument("--json", default=None,
                         help="escribe el resumen en ese fichero, para consolidar")
+    partes.add_argument("--transporte", default="directo",
+                        choices=("directo", "eventos"),
+                        help="sobre que transporte se mide esta mitad")
     args = partes.parse_args(argv)
 
     directorio = Path(tempfile.mkdtemp(prefix="c1a-"))
     orquesta = Orquesta(directorio, args.semilla, silencioso=True,
-                        repeticiones=args.repeticiones)
+                        repeticiones=args.repeticiones,
+                        modo_transporte=args.transporte)
     ordenes = desorden.ordenes_de_llegada(orquesta.guion, args.semilla)
 
     # --- el analisis del desorden, antes de tocar el sistema -----------------
@@ -159,7 +177,8 @@ def main(argv=None):
         """Levanta, entrega barajado y compara. Devuelve (divergencias, emitidas)."""
         carpeta = Path(tempfile.mkdtemp(prefix="c1a-"))
         o = Orquesta(carpeta, args.semilla, silencioso=True,
-                     repeticiones=args.repeticiones, sin_orden=sin_orden)
+                     repeticiones=args.repeticiones, sin_orden=sin_orden,
+                     modo_transporte=args.transporte)
         try:
             o.crear_almacenes()
             o.arrancar()
@@ -205,6 +224,11 @@ def main(argv=None):
     if args.json:
         Path(args.json).write_text(json.dumps({
             "criterio": "C1-A", "veredicto": veredicto, "codigo": codigo,
+            # Sin este campo, dos resumenes con el mismo veredicto y distinto
+            # transporte serian indistinguibles, y la tabla publicada no podria
+            # decir cual es cual. Va en el artefacto, no solo en la pantalla.
+            "transporte": args.transporte,
+            "alcance": transporte.frase_de_alcance(args.transporte),
             "semilla": args.semilla, "digesto_guion": orquesta.digesto,
             "envios": len(orquesta.guion["envios"]), "lotes": len(ref["lotes"]),
             "lecturas_emitidas": emitidas,
@@ -221,7 +245,7 @@ def main(argv=None):
     print("VEREDICTO C1-A: %s" % veredicto)
     print("=" * ANCHO)
     print("C1-A · el orden de los eventos de un mismo envio se respeta siempre")
-    print("Medido sobre un mecanismo directo. NO sobre ningun otro.")
+    print(transporte.frase_de_alcance(args.transporte))
     print("=" * ANCHO)
     print("semilla: %d · digesto del guion: %s" % (args.semilla, orquesta.digesto))
     print("envios: %d · lotes: %d · lecturas emitidas: %d"

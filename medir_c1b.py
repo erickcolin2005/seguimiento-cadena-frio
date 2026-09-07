@@ -61,7 +61,7 @@ import tempfile
 from pathlib import Path
 
 from levantar import Orquesta, SEMILLA_POR_DEFECTO
-from sistema import protocolo, referencia
+from sistema import protocolo, referencia, transporte
 
 ANCHO = 78
 
@@ -89,7 +89,8 @@ def _recuento(orquesta):
 
 
 def correr_tanda(directorio, semilla, repeticiones, etiqueta,
-                 marca_antes=False, receptor_no_idempotente=False):
+                 marca_antes=False, receptor_no_idempotente=False,
+                 modo_transporte="directo"):
     """Ingesta completa, tanda de muertes en la ventana, y recuento final.
 
     Devuelve (recuento, muertes, sin_nada_en_curso). `sin_nada_en_curso` cuenta
@@ -99,7 +100,8 @@ def correr_tanda(directorio, semilla, repeticiones, etiqueta,
     carpeta = Path(tempfile.mkdtemp(prefix="c1b-%s-" % etiqueta))
     o = Orquesta(carpeta, semilla, silencioso=True, repeticiones=repeticiones,
                  marca_antes=marca_antes,
-                 receptor_no_idempotente=receptor_no_idempotente)
+                 receptor_no_idempotente=receptor_no_idempotente,
+                 modo_transporte=modo_transporte)
     muertes = []
     sin_nada_en_curso = 0
     try:
@@ -182,6 +184,9 @@ def main(argv=None):
     partes.add_argument("--traza", action="store_true")
     partes.add_argument("--json", default=None,
                         help="escribe el resumen en ese fichero, para consolidar")
+    partes.add_argument("--transporte", default="directo",
+                        choices=("directo", "eventos"),
+                        help="sobre que transporte se mide esta mitad")
     args = partes.parse_args(argv)
     global VERBOSO
     VERBOSO = args.traza
@@ -195,17 +200,19 @@ def main(argv=None):
     print("mutantes. Esto tarda -- son muchos procesos que nacen y mueren.", flush=True)
 
     correcto, muertes, sin_curso = correr_tanda(
-        None, args.semilla, args.repeticiones, "correcto")
+        None, args.semilla, args.repeticiones, "correcto",
+        modo_transporte=args.transporte)
     if args.sin_calibracion:
         # No se corren los mutantes. El resultado NO es «aprobado sin
         # calibracion»: es que no consta que la tanda entrara en la ventana.
         m1 = m2 = {"acciones": 0, "ternas": []}
     else:
         m1, muertes_m1, _ = correr_tanda(
-            None, args.semilla, args.repeticiones, "m1", marca_antes=True)
+            None, args.semilla, args.repeticiones, "m1", marca_antes=True,
+            modo_transporte=args.transporte)
         m2, muertes_m2, _ = correr_tanda(
             None, args.semilla, args.repeticiones, "m2",
-            receptor_no_idempotente=True)
+            receptor_no_idempotente=True, modo_transporte=args.transporte)
 
     _, cero, dos, sobrantes = acciones_por_hecho(correcto, hechos)
     _, cero_m1, dos_m1, _ = acciones_por_hecho(m1, hechos)
@@ -251,6 +258,8 @@ def main(argv=None):
     if args.json:
         Path(args.json).write_text(json.dumps({
             "criterio": "C1-B", "veredicto": veredicto, "codigo": codigo,
+            "transporte": args.transporte,
+            "alcance": transporte.frase_de_alcance(args.transporte),
             "semilla": args.semilla, "digesto_guion": guion_ref.digesto,
             "envios": len(guion_ref.guion["envios"]), "lotes": len(ref["lotes"]),
             "hechos_actuables": len(hechos),
@@ -277,7 +286,7 @@ def main(argv=None):
     print("=" * ANCHO)
     print("C1-B · una excursion se actua exactamente una vez, incluso si el")
     print("proceso muere entre decidir y registrar.")
-    print("Medido sobre un mecanismo directo. NO sobre ningun otro.")
+    print(transporte.frase_de_alcance(args.transporte))
     print("=" * ANCHO)
     print("semilla: %d · digesto del guion: %s" % (args.semilla, guion_ref.digesto))
     print("envios: %d · lotes: %d" % (len(guion_ref.guion["envios"]), len(ref["lotes"])))

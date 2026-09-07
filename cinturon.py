@@ -68,9 +68,26 @@ ANCHO = 78
 APROBADO, FALLO, INVALIDO = 0, 20, 30
 NOMBRE = {APROBADO: "APROBADO", FALLO: "FALLO", INVALIDO: "MEDICION INVALIDA"}
 
-# CE-5 · las tres expresiones que no se han ganado todavía.
-FRASES_PROHIBIDAS = ("arquitectura distribuida", "tolerante a fallos",
-                     "sistema por eventos")
+# CE-5 · ya no es «tres frases prohibidas». La prohibicion no se borro al
+# cumplirse el tramo: CAMBIO DE OBJETO.
+#
+# Dos de las tres expresiones las compra M11, y M11 existe: la medicion entera
+# se repitio sobre el otro transporte y dio lo mismo. Pero comprarlas no es
+# poder decirlas a secas -- la condicion exige que quien las use diga SOBRE QUE
+# se midio--. Asi que ahora se permiten SOLO si la evidencia que las respalda
+# esta publicada y en verde. Levantar la regla sin poner nada en su sitio
+# habria sido cambiarla por un hueco.
+FRASES_COMPRADAS = ("arquitectura distribuida", "sistema por eventos")
+
+# Y una que NO se compro y sigue prohibida. El tramo autoriza hablar de la
+# arquitectura y de los eventos; NO autoriza esta. Lo medido es la muerte del
+# PROCESO dentro de una ventana, en una maquina: eso no es tolerancia a fallos
+# en general, y usar la expresion seria afirmar lo que nadie midio.
+FRASES_PROHIBIDAS = ("tolerante a fallos",)
+
+# La evidencia que compra las dos primeras, y el comando que la reproduce.
+EVIDENCIA_EVENTOS = "evidencia/pl-6-eventos/corrida.json"
+COMANDO_EVENTOS = "--transporte eventos"
 def publicables():
     """Todo texto publicable del repositorio, DERIVADO y no escrito a mano.
 
@@ -317,20 +334,56 @@ def ep0_estatica(contador):
               "CE-5 · digesto del banco · inventario · auto-guardia")
     fallos = []
 
-    # CT-12 · las tres frases prohibidas, en TODO artefacto publicable.
+    # CT-12 · CE-5, en TODO artefacto publicable. Dos comprobaciones, no una.
     revisados = publicables()
-    con_frase = []
+
+    # (i) La que sigue prohibida sin excepcion: nadie la compro.
+    con_prohibida = []
     for ruta in revisados:
         bajo = ruta.read_text(encoding="utf-8").lower()
         encontradas = [f for f in FRASES_PROHIBIDAS if f in bajo]
         if encontradas:
-            con_frase.append("%s (%s)" % (ruta.relative_to(RAIZ),
-                                          ", ".join(encontradas)))
-    e.di("  CE-5 · %d artefactos publicables revisados (lista DERIVADA, no escrita "
-         "a mano) · con frase prohibida: %s"
-         % (len(revisados), ", ".join(con_frase) if con_frase else "ninguno"))
-    if con_frase:
-        fallos.append("CE-5 · frases prohibidas en: %s" % "; ".join(con_frase))
+            con_prohibida.append("%s (%s)" % (ruta.relative_to(RAIZ),
+                                              ", ".join(encontradas)))
+    e.di("  CE-5(i) · %d artefactos publicables revisados (lista DERIVADA, no "
+         "escrita a mano) · con frase aun prohibida: %s"
+         % (len(revisados), ", ".join(con_prohibida) if con_prohibida else "ninguno"))
+    if con_prohibida:
+        fallos.append("CE-5 · frase que nadie compro, en: %s"
+                      % "; ".join(con_prohibida))
+
+    # (ii) Las que M11 compra: permitidas SOLO con su evidencia detras. La
+    # afirmacion fuerte no se prohibe; se le exige el denominador, que es lo
+    # mismo que este proyecto hace con las inversiones decisivas.
+    usan_fuerte = sorted({str(r.relative_to(RAIZ)) for r in revisados
+                          for f in FRASES_COMPRADAS
+                          if f in r.read_text(encoding="utf-8").lower()})
+    if not usan_fuerte:
+        e.di("  CE-5(ii) · nadie usa la afirmacion fuerte: nada que respaldar")
+    else:
+        respaldo = RAIZ / EVIDENCIA_EVENTOS
+        motivos = []
+        if not respaldo.exists():
+            motivos.append("no existe %s" % EVIDENCIA_EVENTOS)
+        else:
+            crudo = json.loads(respaldo.read_text(encoding="utf-8"))
+            if crudo.get("transporte") != "eventos":
+                motivos.append("la evidencia no es del transporte por eventos "
+                               "(dice %r)" % crudo.get("transporte"))
+            if crudo.get("veredicto") != "APROBADO":
+                motivos.append("la corrida de respaldo no esta en verde (dice %r)"
+                               % crudo.get("veredicto"))
+        # Y que se pueda REPRODUCIR: sin el comando, el lector tiene que
+        # creerse la tabla en vez de volver a sacarla.
+        legible = (RAIZ / "README.md").read_text(encoding="utf-8")
+        if COMANDO_EVENTOS not in legible:
+            motivos.append("el README no publica el comando que la reproduce (%s)"
+                           % COMANDO_EVENTOS)
+        e.di("  CE-5(ii) · la usan %d artefactos · respaldo: %s"
+             % (len(usan_fuerte), "; ".join(motivos) if motivos else "en verde"))
+        if motivos:
+            fallos.append("CE-5 · se afirma de mas: la frase fuerte se usa en %s "
+                          "y %s" % (", ".join(usan_fuerte), "; ".join(motivos)))
 
     # U-13 / DL-2 · el digesto del banco contra su referencia versionada.
     actual = digesto_del_banco()
@@ -474,12 +527,15 @@ def ep3_preflight(contador):
 # --- EP-4 … EP-7 · la medición ------------------------------------------------
 
 def ep4_a_ep7_medicion(contador, repeticiones_c1a, repeticiones_c1b,
-                       sin_calibracion, carpeta_evidencia):
+                       sin_calibracion, carpeta_evidencia,
+                       modo_transporte="directo"):
     e = Etapa("EP-4..7", "C1-A · C1-B · CALIBRACION · SEC-5",
-              "la medicion completa, con su veredicto DP-02")
+              "la medicion completa, con su veredicto DP-02 · transporte %s"
+              % modo_transporte)
     argumentos = ["veredicto.py",
                   "--repeticiones-c1a", str(repeticiones_c1a),
                   "--repeticiones-c1b", str(repeticiones_c1b),
+                  "--transporte", modo_transporte,
                   "--evidencia", str(carpeta_evidencia)]
     if sin_calibracion:
         argumentos.append("--sin-calibracion")
@@ -547,6 +603,13 @@ def main(argv=None):
                              "escribe en `ultima-corrida`, que NO se versiona: la "
                              "corrida de quien prueba el proyecto no debe caer "
                              "dentro de la evidencia publicada de un tramo")
+    partes.add_argument("--transporte", default="directo",
+                        choices=("directo", "eventos"),
+                        help="sobre que transporte corre la medicion. `directo` "
+                             "no necesita red, ni imagen, ni credencial, ni "
+                             "instalar nada; `eventos` necesita el intermediario "
+                             "levantado y el cliente que no trae la biblioteca "
+                             "estandar. El predeterminado es el que sostiene RNF-06")
     args = partes.parse_args(argv)
 
     carpeta = RAIZ / args.carpeta
@@ -554,7 +617,15 @@ def main(argv=None):
     arranque = time.time()
     contador = Contador()
     titulo("CINTURON DE CALIDAD · ocho etapas, de la mas barata a la mas cara")
-    print("Python %s · solo biblioteca estandar" % sys.version.split()[0])
+    if args.transporte == "directo":
+        print("Python %s · solo biblioteca estandar" % sys.version.split()[0])
+    else:
+        # Decirlo aqui y no solo en las notas: la frase de arriba dejaria de ser
+        # cierta en esta corrida, y una cabecera que miente es peor que una que
+        # no esta.
+        print("Python %s · biblioteca estandar MAS un cliente del intermediario"
+              % sys.version.split()[0])
+    print("Transporte de esta corrida: %s" % args.transporte)
     print("Instante de arranque: %s" % ahora())
 
     etapas = []
@@ -588,7 +659,8 @@ def main(argv=None):
                                         args.repeticiones_c1a,
                                         args.repeticiones_c1b,
                                         args.sin_calibracion,
-                                        carpeta)
+                                        carpeta,
+                                        args.transporte)
                     if etapa.veredicto != INVALIDO:
                         break
                     if es_determinista([etapa.motivo]):
@@ -626,7 +698,17 @@ def main(argv=None):
     print("  documentacion de limites. Lo medido es tiempo de pared y procesos")
     print("  arrancados EN ESTA MAQUINA. [NV] el limite del proveedor.")
     print("  Memoria y minutos de CPU: NO MEDIDOS. La biblioteca estandar no los")
-    print("  da de forma portable en esta plataforma y no se instala nada (CE-3).")
+    print("  da de forma portable en esta plataforma y no se instala nada para")
+    print("  medirlos (CE-3).")
+    if args.transporte == "eventos":
+        # Sin esto, la cifra de arriba se leeria como comparable con la del
+        # transporte directo, y no lo es: esta lleva dentro el arranque de los
+        # consumidores y sus reequilibrados. Compararlas sin decirlo seria
+        # publicar una mejora o un empeoramiento que nadie midio.
+        print("  ESTA corrida NO es comparable con la del transporte directo sin")
+        print("  decir por que: lleva dentro el alta de cada consumidor y sus")
+        print("  reequilibrados, que el transporte directo no tiene. Las dos")
+        print("  cifras se publican juntas y etiquetadas, nunca una sola.")
 
     # --- el artefacto crudo, del que se genera la tabla ----------------------
     artefacto = {
@@ -638,6 +720,11 @@ def main(argv=None):
         "ejecuciones_medicion": ejecuciones_hechas,
         "digesto_banco": digesto_del_banco(),
         "donde_corrio": donde_corrio(),
+        # RF-30 pide etiquetar por donde corrio DE VERDAD. El transporte es
+        # parte de ese «donde»: dos corridas con el mismo veredicto y distinto
+        # transporte no dicen lo mismo, y sin este campo la tabla publicada no
+        # podria distinguirlas.
+        "transporte": args.transporte,
         "etapas": [{"codigo": e.codigo, "nombre": e.nombre,
                     "veredicto": NOMBRE[e.veredicto] if e.emitio else "NO EMITIO",
                     "motivo": e.motivo, "segundos": round(e.segundos, 1),
