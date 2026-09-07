@@ -303,14 +303,29 @@ def bloque_sec6(carpeta):
     }
 
 
+def _sin_finales_de_linea(ruta):
+    """Los bytes del fichero con los finales de linea normalizados.
+
+    Un final de linea NO es contenido del banco. Sin esta normalizacion el
+    digesto cambia segun el sistema en que se clone el repositorio -- git
+    entrega CRLF en Windows y LF en Linux--, y entonces U-13 deja de vigilar el
+    banco y pasa a vigilar el checkout.
+
+    No es hipotetico: la primera vez que este proyecto corrio en una maquina
+    que no era la de su autor, EP-0 salio FALLO por esto. `61-muerte-tanda.json`
+    estaba con CRLF y los otros siete con LF, asi que el digesto de Windows y el
+    de Linux nunca podian coincidir. El detector medía lo que no era.
+    """
+    return ruta.read_bytes().replace(b"\r\n", b"\n")
+
+
 def digesto_del_banco():
     """Digesto de los casos y del mapa de mutación. Es lo que U-13 vigila."""
     h = hashlib.sha256()
     for ruta in sorted((RAIZ / "banco" / "casos").glob("*.json")):
         h.update(ruta.name.encode("utf-8"))
-        h.update(ruta.read_bytes())
-    mapa = RAIZ / "banco" / "mapa-mutacion.json"
-    h.update(mapa.read_bytes())
+        h.update(_sin_finales_de_linea(ruta))
+    h.update(_sin_finales_de_linea(RAIZ / "banco" / "mapa-mutacion.json"))
     return h.hexdigest()
 
 
