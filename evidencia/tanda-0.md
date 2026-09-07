@@ -252,9 +252,9 @@ que lleva dos tandas sin hacerse.**
 > obstáculo concreto que la impedía ha desaparecido.
 
 **Qué cambió.** Hasta ahora, pedirle a alguien que leyera esto significaba
-mandarle una carpeta. **Ahora hay un enlace.** El repositorio está publicado, y
-el texto que hay que leer se abre en el navegador sin instalar nada ni pedir
-permiso a nadie.
+mandarle una carpeta. **Ahora hay un enlace.** El repositorio está publicado en
+https://github.com/erickcolin2005/seguimiento-cadena-frio y el texto que hay que
+leer se abre en el navegador sin instalar nada ni pedir permiso a nadie.
 
 **Y hay más que atacar que en las dos tandas anteriores:** la afirmación está
 medida sobre **dos transportes distintos** y coincide campo a campo, hay una
@@ -273,7 +273,7 @@ cual:
 > problema crees que resuelve**. No te cuento nada antes a propósito — lo que
 > quiero saber es qué se entiende sin que yo esté delante.
 >
-> `<enlace al repositorio>`
+> https://github.com/erickcolin2005/seguimiento-cadena-frio
 >
 > Y si te apetece rematar: ¿te parece un problema difícil, o te parece lo que
 > haría por defecto cualquier herramienta que ya conoces? ¿Y hay alguna frase
