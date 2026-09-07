@@ -4,15 +4,15 @@ CINTURON DE CALIDAD · ocho etapas, de la mas barata a la mas cara
 ==============================================================================
 Python 3.13.14 · solo biblioteca estandar
 Transporte de esta corrida: directo
-Instante de arranque: 2026-09-07T01:13:13+00:00
+Instante de arranque: 2026-09-07T06:16:43+00:00
 
 ==============================================================================
 EP-0 · ESTATICA · el gate de texto
 ==============================================================================
   CE-5 · digesto del banco · inventario · auto-guardia
-  CE-5(i) · 10 artefactos publicables revisados (lista DERIVADA, no escrita a mano) · con frase aun prohibida: ninguno
+  CE-5(i) · 11 artefactos publicables revisados (lista DERIVADA, no escrita a mano) · con frase aun prohibida: ninguno
   CE-5(ii) · la usan 2 artefactos · respaldo: en verde
-  U-13 · digesto del banco 8829ea9c6300f8cc · referencia 8829ea9c6300f8cc
+  U-13 · digesto del banco 51419341269b086a · referencia 51419341269b086a
   U-10 · casos enumerados: 64 · A=19 H=4 L=20 O=8 R=6 X=7
   DL-9 · ficheros de pipeline revisados: cinturon.py, .github/workflows/cinturon.yml
   DL-9 · patrones que anularian el veredicto: ninguno
@@ -28,7 +28,7 @@ EP-1+2 · BANCO Y MUTACION POR REGLA
   (b)  discriminacion ... 13/13
   (c1) localizacion ..... 13/13
   (c2) extension ........ 13/13 medidas · 0 NO EVALUABLES
-  -> APROBADO  (26.0 s · 1 procesos)
+  -> APROBADO  (16.0 s · 1 procesos)
 
 ==============================================================================
 EP-3 · PREFLIGHT DE LA MEDICION
@@ -39,14 +39,14 @@ EP-3 · PREFLIGHT DE LA MEDICION
   MUT-2 (receptor no idempotente) declarado: si
   el transporte importa: confluent_kafka, json, os, protocolo, time
   de eso, memoria o reglas: nada
-  -> APROBADO  (0.7 s · 1 procesos)
+  -> APROBADO  (0.6 s · 1 procesos)
 
 ==============================================================================
 EP-4..7 · C1-A · C1-B · CALIBRACION · SEC-5
 ==============================================================================
   la medicion completa, con su veredicto DP-02 · transporte directo
   VEREDICTO DE LA CORRIDA: APROBADO
-  -> APROBADO  (216.2 s · 1 procesos)
+  -> APROBADO  (211.8 s · 1 procesos)
 
 ==============================================================================
 CE-2 · LA FACTURA DEL CINTURON
@@ -54,20 +54,25 @@ CE-2 · LA FACTURA DEL CINTURON
   ETAPA                      SEGUNDOS   PROCESOS
   --------------------------------------------------------------------------
   EP-0                            0.0          0
-  EP-1+2                         26.0          1
-  EP-3                            0.7          1
-  EP-4..7                       216.2          1
+  EP-1+2                         16.0          1
+  EP-3                            0.6          1
+  EP-4..7                       211.8          1
   --------------------------------------------------------------------------
-  TOTAL                         242.9          3
+  TOTAL                         228.5          3
   procesos que la medicion MATA por dentro: 168
   (el 3 de arriba son los hijos DIRECTOS del cinturon)
   ejecuciones de la medicion: 1 de 3 permitidas (U-06)
 
-  Lo que este numero NO es: minutos de un proveedor de CI. Aqui no hay
-  proveedor elegido, y este proyecto no admite ninguna cifra de minutos,
-  ningun precio y ningun nombre de plan sin la cita literal de su
-  documentacion de limites. Lo medido es tiempo de pared y procesos
-  arrancados EN ESTA MAQUINA. [NV] el limite del proveedor.
+  Lo que este numero NO es: minutos facturables de un proveedor. Es
+  tiempo de pared y procesos arrancados EN ESTA MAQUINA, y las dos
+  cifras se publican etiquetadas y nunca promediadas.
+  El limite del proveedor, citado literal de su documentacion:
+    «Each job in a workflow can run for up to 6 hours of execution
+     time.» -- atribuido a All GitHub-hosted runners
+    «GitHub Actions usage is free for standard GitHub-hosted runners
+     in public repositories.»
+    «These limits are subject to change.»
+  Detalle y margen medido: evidencia/ce2-el-cinturon-en-ci.md
   Memoria y minutos de CPU: NO MEDIDOS. La biblioteca estandar no los
   da de forma portable en esta plataforma y no se instala nada para
   medirlos (CE-3).

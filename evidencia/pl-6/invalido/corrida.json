@@ -1,6 +1,6 @@
 {
   "codigo": 30,
-  "digesto_banco": "8829ea9c6300f8cc249fb0f5b3e08b29f90ccc219069bb706f307a5a11de3aba",
+  "digesto_banco": "51419341269b086a7d2fca4652c74f44d1c8b6c5a55bc6975c5922d8b6f28d3c",
   "donde_corrio": {
     "derivada_de": "variable de entorno CI/GITHUB_ACTIONS",
     "etiqueta": "maquina local del autor",
@@ -22,7 +22,7 @@
       "motivo": "",
       "nombre": "BANCO Y MUTACION POR REGLA",
       "procesos": 1,
-      "segundos": 17.4,
+      "segundos": 15.5,
       "veredicto": "APROBADO"
     },
     {
@@ -38,11 +38,11 @@
       "motivo": "\u00b7 MI-3 \u00b7 la corrida no trae calibracion. Sin ella no consta que la tanda entrara en la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO (T-23)",
       "nombre": "C1-A \u00b7 C1-B \u00b7 CALIBRACION \u00b7 SEC-5",
       "procesos": 1,
-      "segundos": 83.8,
+      "segundos": 80.6,
       "veredicto": "MEDICION INVALIDA"
     }
   ],
-  "instante": "2026-09-07T01:18:57+00:00",
+  "instante": "2026-09-07T06:22:08+00:00",
   "motivos": [
     "EP-4..7 \u00b7 \u00b7 MI-3 \u00b7 la corrida no trae calibracion. Sin ella no consta que la tanda entrara en la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO (T-23)"
   ],
@@ -105,7 +105,7 @@
     },
     "completo": true
   },
-  "segundos_total": 101.8,
+  "segundos_total": 96.6,
   "transporte": "directo",
   "veredicto": "MEDICION INVALIDA"
 }
