@@ -1,113 +1,151 @@
-# Notas de PL-6 · la costura del transporte, y el tramo que NO está hecho
+# Notas de PL-6 · el tramo que compra el eje, y lo que costó
 
 Marcas: `[M]` medido ejecutando · `[V]` verificado · `[A]` asumido · `[NV]` no
 verificado.
 
-> **PL-6 no está terminado, y este documento existe para decirlo con precisión.**
-> Lo que se hizo es la parte que no dependía del bloqueo. Lo que falta es la que
-> da nombre al tramo.
+> **Este documento decía, hasta esta corrida, «PL-6 no está terminado, y este
+> documento existe para decirlo con precisión». Ahora está terminado, y el
+> documento existe para decir con la misma precisión qué se midió y qué no.**
 
 ---
 
-## 1 · Las cinco comprobaciones, y dónde está cada una
+## 1 · Las cinco comprobaciones
 
 | # | Qué pedía | Estado |
 |---|---|---|
-| **1** | El transporte por eventos sustituye la llamada directa, y el instrumento mata consumidores | ❌ **NO HECHO** — bloqueado, §3 |
-| **2** | C1-A y C1-B se vuelven a medir sobre el nuevo transporte, con sus tres modos de fallo | ❌ **NO HECHO** — depende de la 1 |
-| **3** | CE-4 registrada: si el costo de la plomería coincidió con lo declarado | ❌ **NO HECHO** — no hay plomería que costar todavía |
-| **4** | CE-3 aplicada: toda limpieza de disco comparada contra el inventario | ⚠️ **NO APLICA AÚN** — no se ha tocado el disco. §3 |
-| **5** | **Solo aquí se levanta CE-5** | ❌ **NO SE LEVANTA.** Sigue vigente y el guardián sigue activo |
+| **1** | El transporte por eventos sustituye la llamada directa, y el instrumento mata consumidores | ✅ **HECHA** · §2 |
+| **2** | C1-A y C1-B se vuelven a medir sobre el nuevo transporte, con sus tres modos de fallo | ✅ **HECHA** · §3 |
+| **3** | CE-4 registrada: si el costo de la plomería coincidió con lo declarado | ✅ **HECHA** · `evidencia/pl-6/ce4-costo-de-la-plomeria.md` |
+| **4** | CE-3 aplicada: toda limpieza de disco comparada contra el inventario | ✅ **HECHA** · `evidencia/pl-6/inventario-ce3.txt` · **ninguna limpieza ejecutada** |
+| **5** | **Solo aquí se levanta CE-5** | ✅ **LEVANTADA, y sustituida** · §5 |
 
-**Cero de cinco.** Lo que sí se hizo es trabajo que las cinco necesitan y que no
-dependía del bloqueo: la costura.
+**Cinco de cinco.**
 
-## 2 · La costura existe, y ahora significa algo
+## 2 · Por qué hicieron falta DOS puertos y no uno
 
-El diseño afirma que **el transporte no sostiene ninguna garantía**, y que por eso
-sustituirlo sería cambiar un adaptador en vez de rediseñar el sistema.
+El diseño decía que en M11 cambian **dos** adaptadores. Solo existía costura en
+el de salida: la ingesta atendía su ruta a pelo, sin puerto.
 
-**Hasta ahora eso era una promesa.** La llamada estaba incrustada dentro del
-drenaje, así que **no había ningún sitio donde enchufar otro transporte** — y una
-afirmación que no se puede intentar romper no está comprobada, solo escrita.
+Y eso no era un detalle de simetría. **Sin puerto de entrada no hay ningún
+consumidor matable**, porque el único que quedaría es el receptor — y el
+receptor es el testigo, al que está prohibido matar porque el recuento no puede
+vivir en el proceso que muere. La comprobación que da nombre al tramo no se
+habría podido ni intentar.
 
-Ahora hay un puerto (`sistema/transporte.py`): un adaptador recibe un hecho
-actuable ya comprometido y devuelve el desenlace que el receptor le dio. Nada más.
+Con los dos puertos, quien muere 56 veces por corrida **es** un consumidor.
 
-### Lo que un adaptador NO puede hacer
+### Una decisión asimétrica, y su razón
 
-- **No deduplica.** La unidad de «exactamente una vez» es la terna, que es de
-  dominio y no de transporte.
-- **No decide si reintentar.** Eso lo decide quien tiene la bandeja.
-- **No ordena.** El orden se re-deriva del número de secuencia, y el sistema no
-  depende del orden de entrega **ni cuando el transporte lo garantiza**.
+Con la entrada por eventos, **la ruta HTTP de lecturas se cierra** (devuelve
+409) `[M]`. Si siguiera abierta, una lectura podría entrar por el camino viejo
+durante una corrida que dice medir sobre el otro transporte: la medición
+afirmaría una cosa mientras el sistema hace otra. Es el defecto de la pieza que
+se cree mutada y no lo está, que este proyecto ya se comió una vez.
 
-### Y no es una promesa: se comprueba por estructura
+**En el receptor NO se cierra la ruta equivalente, a propósito.** Allí una mala
+configuración no produce una medición silenciosamente falsa: produce un
+recuento en cero, que es un fallo a gritos. Y cerrarla rompería las sondas que
+comprueban el vocabulario del receptor posteando directo.
 
-El preflight del cinturón lee el módulo del transporte y **falla si importa
-almacenamiento o reglas** `[M]`:
+### Un desenlace nuevo, porque el productor no sabe lo que no sabe
 
-```
-el transporte importa: protocolo
-de eso, memoria o reglas: nada
-```
+Un productor asíncrono **no conoce el veredicto del receptor**. Devolver
+`registrada` desde él habría sido inventarse una respuesta que nadie dio —
+justo lo que el módulo del transporte se prohíbe—. Hay un cuarto desenlace,
+`entregada_al_transporte`, que informa de un hecho distinto: **custodia duradera
+aceptada**.
 
-**Un adaptador sin memoria no puede deduplicar aunque quisiera.** Si pudiera, la
-garantía viviría en él, cambiar de transporte la cambiaría, y el tramo que falta
-no sería cambiar un adaptador: sería rediseñar.
+La garantía no se mueve por eso: si el proceso muere tras el acuse y antes de
+marcar la entrada, se reproduce y el receptor deduplica por la terna. Sigue
+siendo al-menos-una-vez con receptor idempotente.
 
-### Lo que la costura todavía NO demuestra
+## 3 · Lo medido, con sus dos columnas
 
-**Que sobreviva al cambio.** Hoy hay **un solo** adaptador. La comprobación real
-—que la medición completa de C1 dé lo mismo con dos transportes distintos— **no
-está hecha, porque el segundo no existe**.
+Las dos corridas son **del mismo código y de la misma máquina** `[M]`:
 
-Está declarado en el propio módulo, no solo aquí: *escribir que «el transporte es
-intercambiable» sin haber cambiado ninguno sería exactamente la clase de
-afirmación que este proyecto no publica.*
+| | directo | eventos |
+|---|---|---|
+| C1-A · divergencias | 0 | **0** |
+| divergencias con la versión rota | 18 | **18** |
+| C1-B · hechos actuables · muertes | 56 · 56 | **56 · 56** |
+| hechos con 0 · con ≥2 acciones | 0 · 0 | **0 · 0** |
+| entregas repetidas absorbidas | 28 | **28** |
+| anomalías M-1 / M-2 | 28 / 28 | **28 / 28** |
+| Cinturón | **APROBADO · 0** · 221,3 s | **APROBADO · 0** · 408,6 s |
 
-## 3 · Por qué está bloqueado, con la medición delante
+**Que coincidan es el resultado.** Si la garantía hubiera vivido en el
+transporte, cambiarlo la habría cambiado.
 
-El transporte por eventos necesita un intermediario corriendo en contenedores, y
-**el demonio de contenedores de esta máquina no está en marcha** `[M]`:
+Los tres modos de fallo que el cambio añade ocurrieron y los absorbió una clave
+que ya existía. El del orden se puede ver en el reparto: las lecturas cayeron
+**26 / 50 / 24** entre tres particiones `[M]`. Con una sola partición el orden
+global se habría conservado por accidente y ese modo no se habría ejercido —
+verde sin haber corrido el riesgo.
 
-```
-cliente presente, version 28.5.1
-demonio: no responde
-disco C: 68 GB libres   ·   disco E: 566 GB libres
-```
+## 4 · Los dos defectos, y los dos eran del instrumento
 
-Arrancarlo es una acción sobre **un entorno compartido con los activos locales de
-otro proyecto del portafolio**, y esa condición **tiene dueño, y no es este
-tramo**: es de Erick. El inventario de referencia registra **nueve volúmenes**, y
-los volúmenes son lo único irreemplazable — las imágenes se vuelven a descargar;
-los datos de un volumen, no.
+| # | Qué | Por qué importa |
+|---|---|---|
+| 1 | El bombeo traía las lecturas **de una en una**, con una confirmación de avance por cada una. A tamaño real no terminaba dentro del tope y la corrida salía **INVÁLIDA** | El tope era **fijo**, así que no era un tope: era un límite de tamaño disfrazado. Declaraba inválida una corrida por ser grande, no por estar atascada |
+| 2 | La salida imprimía **«Medido sobre un mecanismo directo»** mientras corría sobre el otro transporte | Un artefacto **publicando la leyenda en vez del hecho medido** — y justo la leyenda que una condición del proyecto impone. Estaba escrita a mano y sobrevivió intacta al cambio que la volvió falsa |
 
-**Lo que no se ha hecho, a propósito:** no se ha arrancado nada, no se ha
-descargado ninguna imagen y **no se ha ejecutado ninguna limpieza de disco**. La
-condición dice que cualquier limpieza se compara contra el inventario antes y
-después, y esa comparación la firma su dueño.
+Los dos se arreglaron **quitando la excepción, no añadiéndola**: el tope ahora
+crece con el trabajo, y la frase de alcance **se deriva** del transporte real.
 
-## 4 · CE-5 sigue vigente, y eso es lo correcto
+**Y un tercero que no es del instrumento sino de mi predicción**, registrado en
+el inventario: escribí que el intermediario no añadiría volúmenes porque no le
+puse ninguno nombrado. Salieron **tres**, anónimos, creados por la propia
+imagen. «Sin volumen nombrado» no es «sin volumen», y un volumen anónimo es
+**más** difícil de atribuir, no menos. Se dejó escrito el error en vez de
+corregir el texto: una predicción refutada por la medición es exactamente lo
+que CE-3 existe para producir.
 
-Este es **el único tramo que puede levantarla**, y no está hecho. Así que:
+## 5 · CE-5 no se borró: cambió de objeto
 
-- El README **sigue diciendo** lo que dice hoy, y ninguna otra cosa.
-- El guardián automático **sigue revisando los ocho artefactos publicables** en
-  cada corrida y poniendo el push en rojo si alguno se adelanta.
-- Cuando el tramo se haga, levantarla **no basta con borrar la prohibición**: la
-  condición 5 exige que el README diga **sobre qué se midió**, no solo que se
-  midió.
+Levantar una regla y no poner nada en su sitio habría sido cambiarla por un
+hueco. Lo que hay ahora, y corre en cada push `[M]`:
 
-**Tenerla vigente no es una limitación pendiente de arreglar: es el estado
-correcto mientras el tramo no exista.** Lo que sería un defecto es levantarla
-antes.
+- **`arquitectura distribuida` y `sistema por eventos`** — las compra M11, y se
+  permiten **solo si la evidencia que las respalda está publicada y en verde**:
+  una corrida sobre el transporte por eventos con veredicto APROBADO, y el
+  comando que la reproduce publicado en el README. Sin eso, el push se pone
+  rojo por *afirmar de más*.
+- **La tercera expresión que el cinturón vigilaba** — la que habla de aguantar
+  fallos en general — **sigue prohibida, y no se escribe aquí ni siquiera para
+  explicarla.** El tramo autoriza hablar de la arquitectura y de los eventos; no
+  autoriza esa. Lo medido es la muerte del **proceso** dentro de una ventana, en
+  una máquina, y eso no es aguantar fallos en general. Su forma literal vive en
+  `cinturon.py`, que es el único sitio donde tiene efecto.
 
-## 5 · Lo que este tramo cambió, y que sigue verde
+La lista de artefactos revisados **se sigue derivando**, no escribiendo a mano.
 
-| | |
-|---|---|
-| El drenaje pasa por el puerto en vez de llamar al transporte directamente | ✅ |
-| Las siete comprobaciones de los dos servicios | ✅ verde |
-| El cinturón entero, con sus tres desenlaces | ✅ **0 · 20 · 30** `[M]` |
-| El preflight comprueba que la garantía no se filtró al transporte | ✅ nuevo |
+### El guardián nuevo se estrenó cazándome a mí
+
+La primera corrida con esta regla salió **FALLO**, y la culpable era esta misma
+sección: escribí la expresión prohibida **para explicar que estaba prohibida**,
+y el patrón literal se autoacusó.
+
+**Es la cuarta vez que pasa exactamente esto en este proyecto** — antes fue un
+patrón de tipos, un raspado de una palabra, y los patrones de anulación de
+veredicto. Y se arregló como las otras tres: **quitando la excepción, no
+añadiéndola.** No se excluyó este fichero de la revisión —eso habría creado un
+sitio donde la regla no mira, que es peor que el problema— sino que se dejó de
+escribir la frase.
+
+Que la regla nueva fallara en su primera corrida, y por una razón real, es la
+única evidencia disponible de que **mira**.
+
+## 6 · Lo que este tramo NO compró
+
+- **Un nodo, una máquina, tres particiones.** Sin partición de red, sin varias
+  máquinas, sin relojes que discrepen `[NV]`.
+- **Sin carga y sin concurrencia externa.** El servidor sigue siendo de un solo
+  hilo a propósito, y el consumidor **se bombea desde el mismo bucle** en vez de
+  desde un hilo aparte: con dos hilos sobre el mismo almacén el camino dejaría
+  de ser reproducible y las carreras se leerían como fallos del sistema siendo
+  del instrumento. El control optimista por versión **sigue sin ejercitarse**.
+- **Que corra orquestado.** No se afirma y no se ha medido.
+- **Las siete comprobaciones de los dos servicios** siguen corriendo **solo
+  sobre el transporte directo**: no están en los cinco criterios de este tramo,
+  y se declara en vez de dejar que parezca cubierto.
+- **Memoria y minutos de CPU**, que siguen sin medirse.

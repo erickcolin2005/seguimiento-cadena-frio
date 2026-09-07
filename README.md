@@ -1,7 +1,7 @@
 # Cadena de frío en transporte · P1
 
-> **Estado: la afirmación de §2 está medida, sobre un mecanismo directo.** Hay un
-> **banco de reglas de cadena de frío que se ejecuta** — 64 casos, trece piezas
+> **Estado: la afirmación de §2 está medida, sobre DOS transportes distintos.** Hay
+> un **banco de reglas de cadena de frío que se ejecuta** — 64 casos, trece piezas
 > apagables— y hoy su corrida termina en **VERDE**.
 >
 > Y hay **dos servicios separados que hablan**, cada uno con su almacén, cuyas
@@ -10,6 +10,19 @@
 > Y sobre eso se midió §2: **cero divergencias de orden** sobre 440 inversiones
 > que sí cambiaban la conclusión, y **exactamente una acción en 56 de 56 hechos**,
 > con 56 muertes de proceso provocadas entre decidir y registrar (§4d).
+>
+> **Y después se volvió a medir entera sobre otro transporte** —una arquitectura
+> distribuida, con los servicios hablando por un intermediario de eventos y
+> **consumidores muertos a propósito**— y **dio lo mismo, campo a campo**. Eso es
+> lo que dice que la garantía no vivía en el transporte: si viviera ahí,
+> cambiarlo la habría cambiado.
+>
+> **Sobre qué se midió esa segunda vez, y sin lo cual la frase de arriba afirma
+> de más:** un nodo del intermediario, en una máquina, tres particiones, 168
+> muertes de proceso por corrida. **Sin partición de red, sin carga, sin
+> concurrencia externa y sin varias máquinas.** La afirmación fuerte y su
+> denominador van pegados, igual que las 440 inversiones decisivas van pegadas a
+> las 1248 observadas.
 >
 > Lo que sigue sin existir: **nadie externo ha leído esto**, no hay carga, no hay
 > nada que un transportista pueda usar, y los valores del dominio siguen siendo
@@ -62,8 +75,8 @@ eso se declara aquí en vez de disimularse. La lectura completa de ese marco
 ## 2 · La afirmación que este proyecto se propone medir
 
 Esta es la afirmación, escrita entera y en presente porque así es como se
-intentó romper. **Está medida en §4d, y sobre un mecanismo directo**; sobre
-cualquier otro sigue siendo solo una frase:
+intentó romper. **Está medida en §4d, y sobre los dos transportes de §4d-2**;
+sobre cualquier tercero sigue siendo solo una frase:
 
 > **El orden de los eventos de un mismo envío se respeta siempre; y una excursión
 > se actúa exactamente una vez, incluso si el proceso muere entre decidir y
@@ -111,11 +124,21 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
    transportista pueda usar**: ninguna interfaz, ninguna sonda real, ningún
    envío que no salga de un guion sintético. Comprobación: listar el repositorio
    y correr los comandos de §4b y §4c.
-2. **No afirma que §2 se cumpla sobre ningún mecanismo que no sea el medido.**
-   §4d dice, con esas palabras, **C1 medido sobre un mecanismo directo**. Sobre
-   ese mecanismo la medida existe y está publicada con sus denominadores. Sobre
-   cualquier otro, **este repositorio no afirma nada y no lo hará hasta que ese
-   otro exista y se mida**.
+2. **No afirma que §2 se cumpla sobre ningún mecanismo que no sea uno de los dos
+   medidos.** Los medidos son **una llamada directa** y **un transporte por
+   eventos con consumidores muertos a propósito**. Sobre los dos la medida existe
+   y está publicada con sus denominadores, y **coincide campo a campo**. Sobre
+   cualquier tercero, **este repositorio no afirma nada y no lo hará hasta que
+   ese tercero exista y se mida**.
+
+   **Y lo que la palabra «distribuida» NO cubre aquí, dicho antes de que lo
+   pregunte nadie:** un nodo del intermediario, una máquina, tres particiones.
+   **No hay partición de red, ni varias máquinas, ni relojes que discrepen.** Lo
+   que se ejerció de verdad son los modos de fallo que trae cambiar el
+   transporte: reconsumo tras un reequilibrado, orden entre particiones que
+   desaparece, y el desacople entre el avance del consumidor y el compromiso
+   local. Los tres los absorbe una clave que ya existía, y por eso ninguno
+   obligó a rediseñar.
 3. **No afirma nada sobre carga ni sobre concurrencia externa.** El servidor es
    de un solo hilo a propósito, para que el camino sea reproducible, así que el
    control de concurrencia optimista **sigue sin ejercitarse** — no roto: sin
@@ -156,7 +179,8 @@ Esta es la sección más importante del documento. Cada punto es comprobable.
 | Código de producto | **Ninguno.** Nada que un transportista pueda usar |
 | Banco de reglas | **Ejecutable.** 64 casos pasan; la corrida termina en **VERDE** |
 | Dos servicios con fronteras reales | **En pie.** Las siete comprobaciones de §4c pasan; **VERDE** |
-| Medición de la afirmación de §2 | **APROBADO**, sobre un mecanismo directo · §4d |
+| Medición de la afirmación de §2 | **APROBADO** sobre una llamada directa · §4d |
+| La misma medición, sobre otro transporte | **APROBADO** sobre eventos, con consumidores muertos · §4d-2 · **coincide campo a campo** |
 | Calibración de esa medición | **Hecha**, y omitirla a propósito sale INVÁLIDA |
 | Lectura por alguien externo | **NO MEDIDA** — declarada por escrito, ver `evidencia/tanda-0.md` |
 | Valores del dominio | **Cerrados como valores de trabajo**, sin validación uno a uno |
@@ -292,6 +316,11 @@ python veredicto.py
 > **C1 medido sobre un mecanismo directo.** Esta corrida no dice nada sobre
 > ningún otro mecanismo, y no lo dirá hasta que exista y se mida.
 
+Esa frase es de **esta** corrida, la del transporte directo, y sigue siendo
+verdad para ella. El otro transporte ya existe y ya se midió: **§4d-2**. Y la
+frase de aquella corrida no se ha editado a posteriori — la evidencia guardada
+dice lo que dijo cuando se ejecutó.
+
 | | |
 |---|---|
 | **Orden** · divergencias contra la referencia | **0** |
@@ -346,6 +375,77 @@ tiene que verse.**
 El detalle está en **`NOTAS-PL3.md`**, incluidos **dos defectos del instrumento**
 que se cazaron antes de publicar nada: uno hacía que la medición midiera otra
 cosa, y otro dejaba una de las versiones rotas **sin romper, en silencio**.
+
+---
+
+## 4d-2 · La misma medición, sobre otro transporte
+
+Todo lo de §4d se midió sobre una **llamada directa**. Que la garantía no
+dependiera de ese mecanismo era, hasta aquí, **una afirmación de diseño sin
+comprobar**: no había ningún sitio donde enchufar otro transporte, así que no
+había forma de intentar romperla.
+
+Ahora hay dos, y la medición entera se repitió sobre el segundo:
+
+```
+python cinturon.py --transporte eventos
+```
+
+| | llamada directa | eventos |
+|---|---|---|
+| **Orden** · divergencias | **0** | **0** |
+| lotes × campos comparados | 10 × 9 | 10 × 9 |
+| divergencias con la versión rota | 18 | **18** |
+| **Exactamente una vez** · hechos actuables | 56 | **56** |
+| muertes de proceso (antes · después de enviar) | 56 (28 · 28) | **56 (28 · 28)** |
+| acciones contadas en el testigo | 56 | **56** |
+| hechos con 0 acciones · con ≥2 | 0 · 0 | **0 · 0** |
+| entregas repetidas absorbidas | 28 | **28** |
+| anomalías de las dos versiones rotas | 28 / 28 | **28 / 28** |
+| **Veredicto del cinturón** | **APROBADO** · 0 | **APROBADO** · 0 |
+
+**Que las dos columnas coincidan es el resultado**, no la coincidencia. Si la
+garantía hubiera vivido en el transporte, cambiarlo la habría cambiado. Vive
+donde el diseño dice que vive: en la bandeja de salida del emisor y en la clave
+de la terna del receptor.
+
+### Qué se ejerció de verdad, y qué no
+
+Cambiar de transporte **añade tres modos de fallo** que la llamada directa no
+tiene. Los tres ocurrieron y los tres los absorbió una clave que ya existía:
+
+| Modo de fallo | Qué lo absorbe |
+|---|---|
+| La misma lectura se procesa dos veces tras un reequilibrado | La ingesta es idempotente por `(envío, secuencia)`: la segunda no crea nada |
+| El orden entre particiones desaparece | **Nunca se dependió de él.** El orden se re-deriva de la secuencia. Las lecturas se repartieron **26 / 50 / 24** entre tres particiones |
+| El avance del consumidor y el compromiso local no son la misma transacción | El avance se confirma **después** del compromiso local, nunca antes. Morir en medio produce un reconsumo, y reconsumir no crea nada |
+
+**Y lo que NO se ejerció, que es la mitad honesta de esto:** un nodo del
+intermediario, una máquina, tres particiones. **Sin partición de red, sin varias
+máquinas, sin relojes que discrepen, sin carga y sin concurrencia externa.** El
+control de concurrencia optimista **sigue sin ejercitarse** también aquí.
+
+### Lo que costó
+
+| | directo | eventos |
+|---|---|---|
+| Cinturón completo | **221,3 s** | **408,6 s** (**1,85×**) |
+| Muertes provocadas | 168 | 168 |
+
+**Se paga en cada corrida, no una vez.** Y con el intermediario configurado para
+*no* esperar antes de reagrupar altas de consumidor; sin eso sería peor. La
+cifra no es interpretable sin esa línea al lado, y por eso van juntas. El
+registro completo está en `evidencia/pl-6/ce4-costo-de-la-plomeria.md`.
+
+### Dos defectos, los dos del instrumento
+
+Ninguno del sistema medido. El primero traía las lecturas **de una en una** y
+hacía que la corrida no terminara a tiempo: se declaraba inválida por ser
+grande, no por estar atascada. El segundo es peor de familia: la salida seguía
+imprimiendo **«medido sobre un mecanismo directo»** *mientras corría sobre el
+otro transporte* — un artefacto publicando la leyenda en vez del hecho medido.
+Estaba escrita a mano; ahora **se deriva del transporte real**, así que no puede
+quedarse vieja.
 
 ---
 
@@ -504,27 +604,31 @@ La regla que se aplica es sencilla: **cuando lo que hace falta es algo que se
 pueda abrir y ver, ese otro; cuando lo que hace falta es una garantía medida y
 refutable, este.** No son el mismo argumento y no se sustituyen.
 
-### Y una cosa que este README todavía no puede decir
+### La frase que este README no podía decir, y qué hizo falta para decirla
 
-Existe una forma más ambiciosa de describir este proyecto — la que su autor
-querría poder usar. **Está prohibida aquí hasta que exista el tramo que la
-compra**, y ese tramo no existe.
+Durante ocho tramos hubo aquí una prohibición explícita: **este texto no podía
+decir «arquitectura distribuida»** —ni un par de expresiones vecinas— hasta que
+existiera el tramo que las compra. No era una formalidad. Había un guardián
+automático que revisaba todos los textos publicables en cada corrida y ponía el
+push en rojo si alguno se adelantaba, con la lista de textos **derivada y no
+escrita a mano**, porque una lista escrita a mano deja escapar al fichero nuevo.
 
-Lo que sí existe es **el sitio por donde ese tramo entraría**: la pieza que envía
-la acción está aislada detrás de una costura, y hay una comprobación automática
-de que **no guarda nada** — sin memoria no puede decidir por su cuenta si algo ya
-llegó, así que la garantía no puede haberse escondido ahí. **Lo que todavía no
-está comprobado es que la costura aguante el cambio**, porque no se ha cambiado
-nada por ella todavía. Decir lo contrario sería justo lo que este repositorio
-evita. Que una conversación vaya de ese tema no
-autoriza a este texto a afirmarlo: son dos cosas distintas, y confundirlas es
-exactamente el modo de fallo que el proyecto persigue en su parte técnica.
+**Ese tramo ya existe, y por eso la frase aparece ahora en el encabezado.** Lo
+que la compró no es haber montado la plomería: es que **la medición entera se
+repitió sobre ella y dio lo mismo, campo a campo** (§4d-2).
 
-Mientras tanto la frase exacta es la que aparece en §4d, y no otra: **C1 medido
-sobre un mecanismo directo**. Hay un guardián automático que revisa **todos** los
-textos publicables de este repositorio en cada corrida y pone el push en rojo si
-alguno se adelanta. La lista de textos que revisa **no está escrita a mano**: se
-deriva, porque una lista escrita a mano deja escapar al fichero nuevo.
+La prohibición no se ha borrado: **ha cambiado de objeto.** El guardián sigue
+corriendo en cada push, y ahora lo que exige es que **quien use la frase diga
+sobre qué se midió**. Una afirmación fuerte sin su denominador al lado es
+exactamente lo que este repositorio lleva desde el principio negándose a
+publicar, y levantar la prohibición sin poner nada en su sitio habría sido
+cambiar una regla por un hueco.
+
+**Y lo que sigue sin poder decirse**, porque no se ha medido: que esto corra
+orquestado, que aguante carga, que sobreviva a una partición de red o a varias
+máquinas, o que la muerte de la máquina —no la del proceso— esté cubierta. Lo
+medido es un nodo, una máquina, tres particiones y 168 muertes de proceso por
+corrida. Está en §4d-2, con esas palabras.
 
 ---
 

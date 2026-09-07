@@ -29,8 +29,15 @@ jobs:
         with:
           python-version: '3.13'
 
-      # No hay dependencias que instalar. El proyecto entero es biblioteca
-      # estandar, y esa es una propiedad que el cinturon comprueba.
+      # Este trabajo no instala NADA, y eso sigue siendo cierto -- pero por una
+      # razon mas estrecha que antes, asi que se dice con precision: corre el
+      # transporte directo, que es solo biblioteca estandar. El otro transporte
+      # que el proyecto mide necesita un cliente que la biblioteca estandar no
+      # trae, y por eso NO corre aqui.
+      #
+      # Decir «el proyecto entero es biblioteca estandar» seria hoy falso, y un
+      # fichero de CI que afirma de mas es la misma clase de defecto que este
+      # proyecto persigue en su codigo.
 
       - name: El cinturon
         run: python cinturon.py
