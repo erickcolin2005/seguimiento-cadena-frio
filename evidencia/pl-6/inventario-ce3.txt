@@ -1,0 +1,174 @@
+CE-3 · INVENTARIO DEL ENTORNO COMPARTIDO, ANTES Y DESPUES DE PL-6
+Referencia: 2026-08-16_gen_logistica-tiempo-real/F0-descubrimiento/d6-inventario-docker-ANTES.txt
+
+POR QUE EXISTE ESTE FICHERO
+  El demonio de contenedores de esta maquina NO es de este proyecto. Dentro
+  viven los activos locales de otros proyectos del portafolio. CE-3 obliga a
+  comparar contra el inventario de referencia antes y despues, y el criterio
+  que manda es el mismo que fijo d6:
+
+    LOS 9 VOLUMENES. Las imagenes se vuelven a descargar; los datos de un
+    volumen, no.
+
+  Lo que P1 anade aqui es deliberado y esta declarado abajo, para que la
+  comparacion de DESPUES no confunda «lo que P1 puso» con «lo que se perdio».
+
+
+================================================================================
+== ANTES — medido al arrancar PL-6, con el demonio recien levantado ============
+================================================================================
+
+Docker Server 28.5.1   (la misma version que registra d6)
+
+== OCUPACION ==
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          15        9         22.88GB   17.13GB (74%)
+Containers      12        0         91.61MB   91.61MB (100%)
+Local Volumes    9        9         280.4MB   0B (0%)
+Build Cache    106        0         12.76GB   12.76GB
+
+== VOLUMENES (9) — EL CRITERIO QUE MANDA ==
+  05_desarrollo_pgdata
+  1c25995cf760907549c4c322e3747716fd6d5a8d5c925641e63e2385f849de21
+  39aacf4b1e26e2b574f4e9fa43b0f3c3b7bdb5aff736e82525c47028ebf5e0a2
+  4f4c545f839a87f7f1dedf5cc021699fc35b48050da2ae1d7a311d9deffa6845
+  531df11f1b97592a56ba796321f669c169286cf5e7af17247f3805bec629f835
+  ai-db-agent_pgdata
+  cartera-consultas-ia_cartera_pgdata
+  pqrs_assistant_ollama
+  pqrs_assistant_pgdata
+
+  Los 9 de d6 estan, uno a uno, con el mismo nombre. Cero perdidas desde la
+  migracion del 2026-08-16.
+
+== IMAGENES CON ETIQUETA (16 filas / 15 unicas) ==
+  ai-db-agent-app:latest            948MB   29ef1865d69f
+  amazon/dynamodb-local:latest      496MB   9539afb50673
+  cartera-demo:latest               173MB   91a44dd98f4a
+  dpage/pgadmin4:latest             535MB   937d10c14821
+  hello-world:latest               10.1kB   1b44b5a3e06a
+  ollama/ollama:latest             3.45GB   3bec0a7a9c30
+  pgvector/pgvector:pg16            441MB   1295482ff641
+  postgres:16                       451MB   8dbd8d750582
+  pqrs_assistant-api:latest        7.75GB   e6e7fbfa8186
+  pqrs_assistant-backend:latest    7.81GB   d3f80b3b66cf
+  pqrs_assistant-ui:latest          562MB   2b162602c969
+  pqrs_assistant-worker-nlp:latest 7.81GB   ee04a7ae6ef3
+  redis:7                           117MB   b4e53bb4637c
+  redis:7-alpine                   41.4MB   13105d2858de
+  reservas:demo                     508MB   ec455286c61e
+  reservas:latest                   508MB   ec455286c61e
+
+  16 filas y 15 unicas NO es una discrepancia: reservas:latest y reservas:demo
+  comparten el ID ec455286c61e. d6 ya lo dejo anotado.
+
+== CONTENEDORES (12) — NINGUNO CORRIENDO ==
+  Todos Exited. Dos de ellos (05_desarrollo-db-1, 05_desarrollo-redis-1) salieron
+  con 255 al arrancar Docker Desktop en esta sesion; ya estaban Exited en d6.
+
+== DISCO ==
+  C: 70,6 GB libres      E: 565 GB libres
+  El vhdx vive en E: desde la migracion del 2026-08-16.
+
+
+================================================================================
+== LO QUE P1 ANADE A PROPOSITO, Y NO ES UNA PERDIDA ============================
+================================================================================
+
+  IMAGEN     apache/kafka:4.3.1   442MB   47dccc76b327
+             apache/kafka@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+             Fijada por version Y por digesto. «latest» no es reproducible: el
+             mismo comando manana puede traer otra cosa, y entonces la evidencia
+             no dice contra que corrio.
+
+  CONTENEDOR p1-eventos            en el puerto 19092 del anfitrion
+
+  VOLUMENES  *** ESTA LINEA ESTABA MAL. LA CORRIGIO LA MEDICION DE DESPUES. ***
+
+             Lo que se escribio aqui ANTES de medir:
+               «NINGUNO. El intermediario corre sin volumen nombrado, asi que
+                el recuento SIGUE SIENDO 9 y la comparacion no tiene ruido.»
+
+             Lo que salio al medir: 9 -> 12. La imagen DECLARA volumenes por su
+             cuenta, y Docker los crea igual aunque nadie los nombre. No poner
+             un volumen nombrado no evita que exista: solo lo deja ANONIMO --
+             que para CE-3 es PEOR, porque un volumen anonimo no se distingue
+             por nombre de los cuatro anonimos que ya habia.
+
+             Se deja escrito el error en vez de arreglar el texto y seguir: una
+             prediccion refutada por la medicion es justo lo que CE-3 existe
+             para producir. Si se hubiera corregido en silencio, el fichero
+             diria que la prediccion acerto.
+
+             El criterio que manda -- los 9 originales -- no se toco. Detalle
+             abajo.
+
+  POR QUE EL 19092 Y NO EL 9092
+             El 9092 ya estaba ocupado por wslrelay.exe (PID 3448), el rele de
+             puertos de WSL — algo del entorno de Erick, no de P1. No se le
+             quita el puerto a nada que ya estuviera ahi.
+
+  UNA CONFIGURACION QUE AFECTA AL NUMERO DE CE-4, Y POR ESO SE DECLARA
+             KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0. El valor por omision es
+             3000 ms, y con >=50 arranques de consumidor por corrida serian mas
+             de 150 s de espera artificial dentro de la factura. Ponerlo a 0 NO
+             elimina los reequilibrados ni los hace mas faciles: quita la espera
+             deliberada que el intermediario introduce para agrupar altas. El
+             coste que CE-4 publique esta medido CON esta configuracion, y sin
+             esta linea esa cifra no seria interpretable.
+
+
+================================================================================
+== DESPUES — medido al cerrar las comprobaciones 1 y 2 de PL-6 ================
+================================================================================
+
+VEREDICTO: SIN PERDIDAS. Y una prediccion mia refutada, que se deja escrita.
+
+  Criterio                                 Antes    Despues   OK
+  ---------------------------------------  -------  --------  --
+  1. LOS 9 VOLUMENES (el que manda)        9        9         SI
+     Comprobados UNO A UNO por nombre, incluidos pqrs_assistant_pgdata
+     (PHorum) y cartera-consultas-ia_cartera_pgdata (P2). Perdidos: 0.
+  2. Imagenes con etiqueta (filas)         16       17        SI
+     La 17 es apache/kafka:4.3.1, que puso P1. Ninguna de las 16 falta.
+  3. Contenedores                          12       13        SI
+     El 13 es p1-eventos. Los 12 anteriores siguen, todos Exited.
+  4. Volumenes TOTALES                     9        12        (ver abajo)
+  5. Espacio libre en C:                   70,6 GB  67,4 GB   -3,2 GB
+     Espacio libre en E:                   565 GB   564,6 GB  -0,4 GB
+  6. Build Cache reclamable                12,76 GB 12,76 GB  igual
+
+LOS TRES VOLUMENES NUEVOS — QUE YO HABIA PREDICHO QUE NO EXISTIRIAN
+
+  Son ANONIMOS y los crea la propia imagen, no un `docker volume create` mio.
+  Los tres cuelgan de p1-eventos:
+
+    fab8daa2f55b9d2d2a550863024d5d31df1bf6a4d72cf2dc62f7a57e419b651b
+        -> /var/lib/kafka/data
+    2f51218ff8027eeb01cb3c6f1c90573e0691507755b97f838ab94a2cd0502357
+        -> /etc/kafka/secrets
+    6f6471040ad62f4a1b71e2c9734b4a8ce25510cf1d39eafaecc634f93df74c2b
+        -> /mnt/shared/config
+
+  LO QUE ESTO ENSENA, Y POR QUE SE ANOTA EN VEZ DE BORRARLO
+
+  «Sin volumen nombrado» NO es «sin volumen». La imagen declara sus volumenes
+  y el motor los crea igual. Mi razonamiento —no nombrarlos deja el recuento
+  limpio— estaba invertido: un volumen anonimo es MAS dificil de atribuir, no
+  menos, porque ya habia cuatro anonimos de otros proyectos y ninguno lleva
+  encima de quien es. Lo unico que salva la atribucion aqui es `docker inspect`
+  sobre el contenedor, no la lista de volumenes.
+
+  Es la misma familia de error que este proyecto persigue: una conclusion
+  sacada de la fila que se estaba mirando (`docker volume ls` sin nombres) en
+  vez del dato (que monta cada contenedor).
+
+  SI ALGUIEN QUIERE DEJAR LA MAQUINA COMO ESTABA: `docker rm -f p1-eventos` y
+  despues borrar ESOS TRES por su identificador, nunca con un barrido general.
+  Un `docker volume prune` aqui tocaria tambien los cuatro anonimos de otros
+  proyectos, y esos son irreemplazables. NO SE EJECUTA DESDE AQUI: es el
+  entorno de Erick y lo firma su dueno.
+
+NO SE HA EJECUTADO NINGUNA LIMPIEZA DE DISCO EN TODO EL TRAMO.
+  Ni un prune, ni un rm, ni un borrado de imagenes. Lo unico que cambio en el
+  disco es lo que P1 anadio y esta declarado arriba.

@@ -1,4 +1,5 @@
 {
+  "alcance": "Medido sobre un mecanismo directo. NO sobre ningun otro.",
   "clases_cubiertas": 5,
   "codigo": 0,
   "criterio": "C1-A",
@@ -21,5 +22,6 @@
   },
   "semilla": 20260906,
   "sin_clase": 1,
+  "transporte": "directo",
   "veredicto": "APROBADO"
 }

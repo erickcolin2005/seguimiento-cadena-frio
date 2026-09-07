@@ -1,5 +1,5 @@
 {
-  "codigo": 30,
+  "codigo": 0,
   "digesto_banco": "8829ea9c6300f8cc249fb0f5b3e08b29f90ccc219069bb706f307a5a11de3aba",
   "donde_corrio": {
     "derivada_de": "variable de entorno CI/GITHUB_ACTIONS",
@@ -22,7 +22,7 @@
       "motivo": "",
       "nombre": "BANCO Y MUTACION POR REGLA",
       "procesos": 1,
-      "segundos": 17.4,
+      "segundos": 18.9,
       "veredicto": "APROBADO"
     },
     {
@@ -30,23 +30,21 @@
       "motivo": "",
       "nombre": "PREFLIGHT DE LA MEDICION",
       "procesos": 1,
-      "segundos": 0.5,
+      "segundos": 0.6,
       "veredicto": "APROBADO"
     },
     {
       "codigo": "EP-4..7",
-      "motivo": "\u00b7 MI-3 \u00b7 la corrida no trae calibracion. Sin ella no consta que la tanda entrara en la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO (T-23)",
+      "motivo": "",
       "nombre": "C1-A \u00b7 C1-B \u00b7 CALIBRACION \u00b7 SEC-5",
       "procesos": 1,
-      "segundos": 83.8,
-      "veredicto": "MEDICION INVALIDA"
+      "segundos": 389.0,
+      "veredicto": "APROBADO"
     }
   ],
-  "instante": "2026-09-07T01:18:57+00:00",
-  "motivos": [
-    "EP-4..7 \u00b7 \u00b7 MI-3 \u00b7 la corrida no trae calibracion. Sin ella no consta que la tanda entrara en la ventana, y una ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO (T-23)"
-  ],
-  "muertes_provocadas_por_la_medicion": 56,
+  "instante": "2026-09-06T23:41:25+00:00",
+  "motivos": [],
+  "muertes_provocadas_por_la_medicion": 168,
   "no_medido": [
     "minutos y limites del proveedor de CI",
     "memoria y minutos de CPU",
@@ -72,7 +70,20 @@
       "sin_nada_en_curso": 0
     },
     "3_mutantes_y_sus_anomalias": {
-      "ausente": true
+      "M-1": {
+        "acciones": 28,
+        "anomalias": 28,
+        "cero": 28,
+        "dos": 0
+      },
+      "M-2": {
+        "acciones": 84,
+        "anomalias": 28,
+        "cero": 0,
+        "dos": 28
+      },
+      "que_es": "la refutacion: sin anomalias, la tanda no entro en la ventana",
+      "total": 56
     },
     "4_semilla_y_digesto": {
       "digesto_c1a": "fb37658608a61111cd82e8b9cdae96a383057608de8e99f083726109bb251ee1",
@@ -100,12 +111,12 @@
     },
     "7_ausencia_de_calibracion": {
       "demostrado_en": "evidencia/pl-4/invalido/",
-      "hay_calibracion": false,
+      "hay_calibracion": true,
       "regla": "la ausencia de calibracion es MEDICION INVALIDA, jamas APROBADO"
     },
     "completo": true
   },
-  "segundos_total": 101.8,
-  "transporte": "directo",
-  "veredicto": "MEDICION INVALIDA"
+  "segundos_total": 408.6,
+  "transporte": "eventos",
+  "veredicto": "APROBADO"
 }

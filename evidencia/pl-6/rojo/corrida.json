@@ -18,7 +18,7 @@
       "veredicto": "FALLO"
     }
   ],
-  "instante": "2026-09-06T22:04:39+00:00",
+  "instante": "2026-09-07T01:18:58+00:00",
   "motivos": [
     "EP-0 \u00b7 DL-9 \u00b7 el pipeline contiene algo que anula su veredicto"
   ],
@@ -36,5 +36,6 @@
     "falta": "no hay artefacto de medicion del que leer los elementos"
   },
   "segundos_total": 0.0,
+  "transporte": "directo",
   "veredicto": "FALLO"
 }
